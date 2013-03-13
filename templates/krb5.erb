@@ -1,0 +1,26 @@
+##
+## Managed by Puppet
+##
+
+includedir /var/lib/sss/pubconf/krb5.include.d/
+
+[libdefaults]
+  default_realm = <%= ipa_realm %>
+  dns_lookup_realm = false
+  dns_lookup_kdc = false
+  rdns = false
+  ticket_lifetime = 24h
+  forwardable = yes
+
+[realms]
+  <%= ipa_realm %> = {
+    kdc = <%= ipa_server %>:88
+    master_kdc = <%= ipa_server %>:88
+    admin_server = <%= ipa_server %>:749
+    default_domain = <%= ipa_domain%>
+    pkinit_anchors = FILE:/etc/ipa/ca.crt
+  }
+
+[domain_realm]
+  .<%= ipa_domain%> = <%= ipa_realm %>
+  <%= ipa_domain%> = <%= ipa_realm %>
