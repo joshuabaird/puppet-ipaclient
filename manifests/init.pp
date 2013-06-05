@@ -44,13 +44,19 @@ class ipaclient ( $enrollment_host = "idm01.example.com",
         content     => template("ipaclient/sudo-ldap.erb"),
     }
 
-    # Add nisdomain to /etc/rc.local
+    # Add nisdomain to /etc/rc.local & make it live
     # According to https://access.redhat.com/site/solutions/180193
-    # Alternative is to enable ypbind
-    # which is silly.  This needs a better FIXME in IPA
+    # Alternative is to enable ypbind which is silly / overkill.
+    # This needs a better fix in IPA.
+
     exec { "add_nisdomain":
         command => "/bin/echo nisdomainname $ipa_domain >> /etc/rc.local",
         unless  => "/bin/grep -q \"nisdomainname $ipa_domain\" /etc/rc.local",
+    }
+
+    exec { "nisdomain_live":
+        command => "/bin/nisdomainname $ipa_domain",
+        unless  => "/bin/nisdomainname | grep -q $ipa_domain",
     }
 
     # FIXME Workaround for problem with augeas nsswitch.conf lens
