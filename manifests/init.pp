@@ -86,7 +86,7 @@ class ipaclient ( $manual_register = false,
     # Set options for ipa-client-install command:
     
     # If we're not using DNS auto-detection
-    if $manual_register  {
+    if $manual_register {
 
         if $enrollment_host {  $enroll = " --server $enrollment_host" }
         if $ipa_domain      {  $dom    = " --domain $ipa_domain" }
@@ -110,15 +110,18 @@ class ipaclient ( $manual_register = false,
         require     => Package["ipa-client"],
     }
 
-    # Support vip configuration
-    file { "krb5_fixed":
-        ensure      => present,
-        path        => "/etc/krb5.conf",
-        owner       => root,
-        group       => root,
-        mode        => 0644,
-        content     => template("ipaclient/krb5.erb"),
-        require     => Exec["ipa_installer"],
+    # Support vip configuration:
+    #   Only if manual configuration, and only if we're not an ipa server
+    if $manual_register == true and $is_ipa_server == false {
+	    file { "krb5_fixed":
+	        ensure      => present,
+        	path        => "/etc/krb5.conf",
+        	owner       => root,
+        	group       => root,
+        	mode        => 0644,
+        	content     => template("ipaclient/krb5.erb"),
+        	require     => Exec["ipa_installer"],
+    	    }
     }
 
     # Add nisdomain to /etc/rc.local & make it live
