@@ -2,22 +2,17 @@ ipaclient
 ========
 
 This is the ipaclient module.  You can use it to configure your servers
-to use FreeIPA (only tested with version 2).  It handles automatic
-IPA SUDOers setup, and also has the notion of supporting a "VIP."  Initial
+to use FreeIPA.  It handles automatic IPA SUDOers setup, and also has the
+notion of supporting a "VIP" if you have more than one IPA server, and
+cannot use the DNS service records (autodetection).  When using a VIP,
 registration must occur to the real hostname of the IDM server ($enrollment\_host)
 then you can switch to using a VIP without problems ($ipa\_server).
 
 Really, you should use the DNS Server that comes with IPA, or setup
 your own SRV records to point to IPA, but that's not always possible.
 
-This module's not meant to serve everyone's IPA needs.  Just something
-I wrote for a specific use case.  Feel free to make it more generic.
-
-Maybe you'd prefer to have a look at the proper provider and type that 
-can also register to IPA:
-
-    https://github.com/stbenjam/puppet-authconfig
-
+Full documentation including descriptions of paramters are in
+manifests/init.pp.
 
 MIT License
 -----------
