@@ -1,18 +1,32 @@
-ipaclient
+[![Build Status](https://travis-ci.org/stbenjam/puppet-ipaclient.svg?branch=master)](https://travis-ci.org/stbenjam/puppet-ipaclient)
+
+
+IPAclient
 ========
 
-This is the ipaclient module.  You can use it to configure your servers
-to use FreeIPA.  It handles automatic IPA SUDOers setup, and also has the
-notion of supporting a "VIP" if you have more than one IPA server, and
-cannot use the DNS service records (autodetection).  When using a VIP,
-registration must occur to the real hostname of the IDM server ($enrollment\_host)
-then you can switch to using a VIP without problems ($ipa\_server).
+This module supports configuring clients to use FreeIPA.
 
-Really, you should use the DNS Server that comes with IPA, or setup
-your own SRV records to point to IPA, but that's not always possible.
+Full documentation including examples and descriptions of
+parameters are in manifests/init.pp.
 
-Full documentation including descriptions of paramters are in
-manifests/init.pp.
+Supported Platforms
+-------------------
+
+Tested on RHEL 6 and Fedora 20.
+
+Load Balanced FreeIPA
+---------------------
+
+This module has the notion of supporting a virtual hostname if
+you have more than one IPA server, and cannot use the DNS service
+records for discovery.
+
+When using a virtualhost, registration *must* occur to the real hostname
+of the IDM server ($enrollment\_host) then you can switch to using a 
+virtual host without problems ($ipa\_server).  LDAP replicas
+can be specified with the replicas parameter.
+
+See manifests/init.pp for more info.
 
 MIT License
 -----------
