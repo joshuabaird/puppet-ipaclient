@@ -1,6 +1,7 @@
 # == Class: ipaclient
 #
 # You can use this class to configure your servers to use FreeIPA
+#
 # Tested on Fedora 20 and RHEL 6
 #
 # === Parameters
@@ -10,41 +11,41 @@
 #
 # All Parameters:
 #
-# domain_dn         dn, e.g. dc=example,dc=com
-# enable_sudo       let IPA manage sudoers
-# enrollment_host   specific IPA server to register to (e.g., ipa01.example.com)
-# ipa_domain        domain, e.g. example.com
-# ipa_realm         realm, e.g. EXAMPLE.COM
-# ipa_server        an ipa server, can be a VIP (e.g. ipa.example.com)
-# join_pw           one-time password, or registraiton user's password
-# join_user         when not using one-time passwords
-# manual_register   use DNS autodetection (default) or specify settings yourself for IPA
-# mkhomedir         automatically make /home/<user> or not
-# replicas          array of IPA servers (for LDAP failover)
-# sudo_bindpw       password for LDAP sudo bind
+# manual_register   Use DNS autodetection (default) or specify settings yourself for IPA
+# domain_dn         DN, e.g. dc=pixiedust,dc=com
+# enable_sudo       Lookup sudoer rights in IPA
+# enrollment_host   Specific IPA server to register to (e.g., ipa01.pixiedust.com)
+# ipa_domain        Domain, e.g. pixiedust.com
+# ipa_realm         Realm, e.g. PIXIEDUST.COM
+# ipa_server        An ipa server, can be a VIP (e.g. ipa.pixiedust.com)
+# join_pw           One-time password, or registration user's password
+# join_user         When not using one-time passwords, a.k.a. principal in IPA terminology
+# mkhomedir         Putomatically make /home/<user> or not
+# replicas          Array of IPA servers (for LDAP failover)
+# sudo_bindpw       Password for LDAP sudo bind
 #
 # === Examples
 #
 # Discovery register example:
 #
 #  class { ipaclient:
-#       join_pw         => "potatoes"
+#       join_pw         => "rainbows"
 #  }
 #
 # Manual register example:
 #
 #  class { ipaclient:
 #       manual_reigster => true,
-#       mkhomedir       => false,
-#       join_pw         => "potatos",
-#       join_user       => "register",
-#       enrollment_host => "ipa01.example.com",
-#       ipa_server      => "ipa-vip.example.com",
-#       ipa_domain      => "example.com",
-#       ipa_realm       => "EXAMPLE.COM",
-#       replicas        => ["ipa01.example.com", "ipa02.example.com"]
-#       domain_dn       => "dc=example,dc=com",
-#       sudo_bindpw     => "potatoes",
+#       mkhomedir       => true,
+#       join_pw         => "unicorns",
+#       join_user       => "rainbows",
+#       enrollment_host => "ipa01.pixiedust.com",
+#       ipa_server      => "ipa.pixiedust.com",
+#       ipa_domain      => "pixiedust.com",
+#       ipa_realm       => "PIXEDUST.COM",
+#       replicas        => ["ipa01.pixiedust.com", "ipa02.pixiedust.com"]
+#       domain_dn       => "dc=pixiedust,dc=com",
+#       sudo_bindpw     => "sprinkles",
 #  }
 #
 # === Authors
@@ -84,11 +85,11 @@ class ipaclient (
   }
 
   # Build the installation comamnd:
-  if $join_user             {  $user   = "--principal ${join_user}\@${ipa_realm}"}
+  if $join_user             {  $user    = "--principal ${join_user}\@${ipa_realm}"}
   if $mkhomedir             {  $homedir = ' --mkhomedir'}
-  if $ipa_realm != 'UNSET'  {  $realm  = "--realm ${ipa_realm}" }
-  if $enrollment_host       {  $enroll = "--server ${enrollment_host}" }
-  if $ipa_domain            {  $dom    = "--domain ${ipa_domain}" }
+  if $ipa_realm != 'UNSET'  {  $realm   = "--realm ${ipa_realm}" }
+  if $enrollment_host       {  $enroll  = "--server ${enrollment_host}" }
+  if $ipa_domain            {  $dom     = "--domain ${ipa_domain}" }
 
   $command = "${ipa_installer} --password ${join_pw} ${realm} --unattended --force ${homedir} ${enroll} ${dom} ${user}"
 
