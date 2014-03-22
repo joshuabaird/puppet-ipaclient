@@ -19,7 +19,10 @@ class ipaclient::params {
   case $::osfamily {
     RedHat: {
       case $::operatingsystem {
-        RedHat: {
+        'RedHat': {
+          $ipa_package = 'ipa-client'
+        }
+        'CentOS': {
           $ipa_package = 'ipa-client'
         }
         default: {
