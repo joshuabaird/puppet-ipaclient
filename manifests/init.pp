@@ -85,7 +85,7 @@ class ipaclient (
   }
 
   # Build the installation comamnd:
-  if $join_user             {  $user    = "--principal ${join_user}\@${ipa_realm}"}
+  if $join_user             {  $user    = "--principal ${join_user}\\@${ipa_realm}"}
   if $mkhomedir             {  $homedir = ' --mkhomedir'}
   if $ipa_realm != 'UNSET'  {  $realm   = "--realm ${ipa_realm}" }
   if $enrollment_host       {  $enroll  = "--server ${enrollment_host}" }
