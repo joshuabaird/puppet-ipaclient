@@ -1,9 +1,9 @@
-binddn uid=sudo,cn=sysaccounts,cn=etc,<%= domain_dn %>
-bindpw <%= sudo_bindpw %>
+binddn uid=sudo,cn=sysaccounts,cn=etc,<%= @domain_dn %>
+bindpw <%= @sudo_bindpw %>
 ssl start_tls
 tls_cacertfile /etc/ipa/ca.crt
 tls_checkpeer yes
 bind_timelimit 5
 timelimit 15
-uri <% replicas.each do |replica| -%>ldap://<%= replica -%> <% end %>
-sudoers_base ou=SUDOers,<%= domain_dn %>
+uri <% @replicas.each do |replica| -%>ldap://<%= replica -%> <% end %>
+sudoers_base ou=SUDOers,<%= @domain_dn %>
