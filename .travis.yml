@@ -11,8 +11,9 @@ notifications:
     - stephen@bitbin.de
 env:
   - PUPPET_VERSION="~> 2.7.0" 
-  - PUPPET_VERSION=3.2.0
-  - PUPPET_VERSION=3.3
+  - PUPPET_VERSION="~> 3.2.0"
+  - PUPPET_VERSION="~> 3.3.0"
+  - PUPPET_VERSION="~> 3.4.0"
 matrix:
   allow_failures:
     # No support for Ruby 1.9.3 on Puppet 2.x
