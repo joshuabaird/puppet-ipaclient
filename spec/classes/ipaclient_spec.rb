@@ -161,6 +161,28 @@ describe 'ipaclient' do
     end
   end
 
+  # Any non-Fedora OS in the Red Hat family gets "ipa-client" package
+  context 'RHEL-Compatible Support' do
+    let(:facts) {
+      default_facts.merge({
+        :osfamily        => 'RedHat',
+        :operatingsystem => 'Whatever',
+      })
+    }
+
+    let(:params) {
+      {
+        :manual_register => false,
+        :mkhomedir       => true,
+        :join_pw         => "unicorns",
+      }
+    }
+
+    it "should have the right package name"  do
+      should contain_package('ipa-client')
+    end
+  end
+
   context "Fedora - Manual Install with All Features" do
     let(:facts) {
       default_facts.merge({
