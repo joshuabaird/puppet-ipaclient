@@ -9,6 +9,7 @@ class ipaclient::params {
   $enrollment_host = ''
   $ipa_server      = ''
   $ipa_domain      = ''
+  $ipa_options     = ''
   $replicas        = []
   $domain_dn       = ''
   $enable_sudo     = false

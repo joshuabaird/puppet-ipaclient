@@ -18,6 +18,7 @@
 # ipa_domain        Domain, e.g. pixiedust.com
 # ipa_realm         Realm, e.g. PIXIEDUST.COM
 # ipa_server        An ipa server, can be a VIP (e.g. ipa.pixiedust.com)
+# ipa_options       Additional command-line options to pass directly to installer
 # join_pw           One-time password, or registration user's password
 # join_user         When not using one-time passwords, a.k.a. principal in IPA terminology
 # mkhomedir         Putomatically make /home/<user> or not
@@ -72,6 +73,7 @@ class ipaclient (
   $sudo_bindpw     = $ipaclient::params::sudo_bindpw,
   $ipa_package     = $ipaclient::params::ipa_package,
   $ipa_installer   = $ipaclient::params::ipa_installer,
+  $ipa_options     = $ipaclient::params::ipa_options,
 ) inherits ipaclient::params {
 
   # Required Options
@@ -91,7 +93,7 @@ class ipaclient (
   if $enrollment_host       {  $enroll  = "--server ${enrollment_host}" }
   if $ipa_domain            {  $dom     = "--domain ${ipa_domain}" }
 
-  $command = "${ipa_installer} --password ${join_pw} ${realm} --unattended --force ${homedir} ${enroll} ${dom} ${user}"
+  $command = "${ipa_installer} --password ${join_pw} ${realm} --unattended --force ${homedir} ${enroll} ${dom} ${user} ${ipa_options}"
 
   # Run the installer
   exec { 'ipa_installer':

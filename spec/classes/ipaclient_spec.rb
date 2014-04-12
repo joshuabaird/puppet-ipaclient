@@ -21,7 +21,7 @@ describe 'ipaclient' do
     end
   end
 
-  # Only RedHat & Fedora are supported
+  # Only RedHat clones & Fedora are supported
   context 'on unsupported operatingsystem' do
     let :facts do
       {
@@ -52,6 +52,7 @@ describe 'ipaclient' do
         :manual_register => false,
         :mkhomedir       => true,
         :join_pw         => "unicorns",
+        :ipa_options     => "--permit",
       }
     }
 
@@ -61,7 +62,7 @@ describe 'ipaclient' do
 
     it "should generate the right command" do
       should contain_exec('ipa_installer').
-        with_command(/\/usr\/sbin\/ipa-client-install\s+--password unicorns\s+--unattended\s+--force\s+--mkhomedir/)
+        with_command(/\/usr\/sbin\/ipa-client-install\s+--password unicorns\s+--unattended\s+--force\s+--mkhomedir\s+--permit/)
     end
 
     it "should not configure sudo" do
@@ -109,7 +110,7 @@ describe 'ipaclient' do
 
     it "should generate the correct command" do
       should contain_exec('ipa_installer').with({
-        'command' => "/usr/sbin/ipa-client-install --password unicorns --realm PIXIEDUST.COM --unattended --force  --server ipa01.pixiedust.com --domain pixiedust.com --principal rainbows\\@PIXIEDUST.COM",
+        'command' => "/usr/sbin/ipa-client-install --password unicorns --realm PIXIEDUST.COM --unattended --force  --server ipa01.pixiedust.com --domain pixiedust.com --principal rainbows\\@PIXIEDUST.COM ",
       })
     end
 
