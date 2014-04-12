@@ -12,13 +12,14 @@ parameters are in manifests/init.pp.
 Supported Platforms
 -------------------
 
-Tested on RHEL 6 and Fedora 20.
+Tested on RHEL 6, CentOS 6, and Fedora 20.  It should work on any
+Red Hat family OS that has IPA packages.
 
 Load Balanced FreeIPA
 ---------------------
 
-This module has the notion of supporting a virtual hostname if
-you have more than one IPA server, and cannot use the DNS service
+An optional featue of this module is supporting a virtual hostname if
+you have more than one IPA server and cannot use the DNS service
 records for discovery.
 
 When using a virtualhost, registration *must* occur to the real hostname
