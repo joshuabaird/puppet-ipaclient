@@ -2,7 +2,7 @@
 before_install:
   - sudo apt-get install -qq augeas-tools augeas-lenses libaugeas-dev
 language: ruby
-script: "bundle exec rake rspec"
+script: "rake spec"
 rvm:
   - 1.9.3
   - 2.0.0
