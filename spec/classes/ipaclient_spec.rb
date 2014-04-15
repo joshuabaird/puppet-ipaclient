@@ -253,7 +253,7 @@ describe 'ipaclient' do
   end
 
   # Allow $ipa_server to be a string
-  context "IPA Server List is Array" do
+  context "IPA Server List is String" do
     let(:facts) {
       default_facts.merge({
         :osfamily        => 'RedHat',
