@@ -2,28 +2,40 @@
 #
 # You can use this class to configure your servers to use FreeIPA
 #
-# Tested on Fedora 20 and RHEL 6
-#
 # === Parameters
 #
 # Required Parameters (if relying on DNS discovery):
-#    join_pw
+#   join_pw
 #
 # All Parameters:
 #
-# manual_register   Use DNS autodetection (default) or specify settings yourself for IPA
-# domain_dn         DN, e.g. dc=pixiedust,dc=com
-# enable_sudo       Lookup sudoer rights in IPA
-# enrollment_host   Specific IPA server to register to (e.g., ipa01.pixiedust.com)
-# ipa_domain        Domain, e.g. pixiedust.com
-# ipa_realm         Realm, e.g. PIXIEDUST.COM
-# ipa_server        An ipa server, can be a VIP (e.g. ipa.pixiedust.com)
-# ipa_options       Additional command-line options to pass directly to installer
-# join_pw           One-time password, or registration user's password
-# join_user         When not using one-time passwords, a.k.a. principal in IPA terminology
-# mkhomedir         Putomatically make /home/<user> or not
-# replicas          Array of IPA servers (for LDAP failover)
-# sudo_bindpw       Password for LDAP sudo bind
+# $manual_register::       Use DNS autodetection (default) or specify settings yourself for IPA
+#
+# $domain_dn::             DN, e.g. dc=pixiedust,dc=com
+#
+# $enable_sudo::           Lookup sudoer rights in IPA
+#
+# $enrollment_host::       Specific IPA server to register to (e.g., ipa01.pixiedust.com).  Only
+#                          needed when $ipa_server is a virtual hostname.
+#
+# $ipa_domain::            Domain, e.g. pixiedust.com
+#
+# $ipa_realm::             Realm, e.g. PIXIEDUST.COM
+#
+# $ipa_server::            Can be a virtual host (e.g. ipa.pixiedust.com), or an array of IPA servers.
+#                          When using a virtual host, $enrollment_host must point to a real IPA server.
+#
+# $ipa_options::           Additional command-line options to pass directly to installer
+#
+# $join_pw::               One-time password, or registration user's password
+#
+# $join_user::             When not using one-time passwords, a.k.a. principal in IPA terminology
+#
+# $mkhomedir::             Automatically make /home/<user> or not
+#
+# $replicas::              Array of IPA servers (for sudo failover)
+#
+# $sudo_bindpw::           Password for LDAP sudo bind
 #
 # === Examples
 #
@@ -57,7 +69,7 @@
 #
 # Copyright 2013 Stephen Benjamin.
 # Released under the MIT License. See LICENSE for more information
-
+#
 class ipaclient (
   $manual_register = $ipaclient::params::manual_register,
   $mkhomedir       = $ipaclient::params::mkhomedir,
@@ -76,24 +88,34 @@ class ipaclient (
   $ipa_options     = $ipaclient::params::ipa_options,
 ) inherits ipaclient::params {
 
-  # Required Options
-  if $join_pw == 'UNSET' {
-    fail('Require at least a join password')
-  }
+  validate_array($replicas)
+  validate_bool($manual_register, $enable_sudo, $mkhomedir)
+  validate_string($join_pw, $join_user, $enrollment_host,
+                  $ipa_realm, $domain_dn, $sudo_bindpw,
+                  $ipa_package, $ipa_installer, $ipa_options)
 
-  # Install the IPA client
   package { $ipa_package:
     ensure      => installed,
   }
 
-  # Build the installation comamnd:
-  if $join_user             {  $user    = "--principal ${join_user}\\@${ipa_realm}"}
-  if $mkhomedir             {  $homedir = ' --mkhomedir'}
-  if $ipa_realm != 'UNSET'  {  $realm   = "--realm ${ipa_realm}" }
-  if $enrollment_host       {  $enroll  = "--server ${enrollment_host}" }
-  if $ipa_domain            {  $dom     = "--domain ${ipa_domain}" }
+  if $join_pw   == 'UNSET' { fail('Require at least a join password') }
+  if $ipa_realm != 'UNSET' { $realm   = "--realm ${ipa_realm}" }
+  if $join_user            { $user    = "--principal ${join_user}\\@${ipa_realm}"}
+  if $mkhomedir            { $homedir = ' --mkhomedir'}
+  if $enrollment_host      { $enroll  = "--server ${enrollment_host}" }
+  if $ipa_domain           { $dom     = "--domain ${ipa_domain}" }
 
-  $command = "${ipa_installer} --password ${join_pw} ${realm} --unattended --force ${homedir} ${enroll} ${dom} ${user} ${ipa_options}"
+  # Support $ipa_server as an array
+  if $ipa_server and empty($enrollment_host) { 
+    if is_array($ipa_server) {
+        $server_list = join($ipa_server, " --server ")
+    } else {
+        $server_list = $ipa_server
+    }
+    $server = "--server ${server_list}"
+  }
+
+  $command = "${ipa_installer} --password ${join_pw} ${realm} --unattended --force ${homedir} ${enroll} ${server} ${dom} ${user} ${ipa_options}"
 
   # Run the installer
   exec { 'ipa_installer':
@@ -102,7 +124,7 @@ class ipaclient (
     require     => Package[$ipa_package],
   }
 
-  # Support vip configuratio -- only if manual configuration, and only if we're not an ipa server
+  # Support vip configuration -- only if manual configuration, and only if we're not an ipa server
   if $manual_register == true and $is_ipa_server == false {
     file { '/etc/krb5.conf':
       ensure      => present,

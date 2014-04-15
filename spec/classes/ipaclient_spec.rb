@@ -109,9 +109,7 @@ describe 'ipaclient' do
     end
 
     it "should generate the correct command" do
-      should contain_exec('ipa_installer').with({
-        'command' => "/usr/sbin/ipa-client-install --password unicorns --realm PIXIEDUST.COM --unattended --force  --server ipa01.pixiedust.com --domain pixiedust.com --principal rainbows\\@PIXIEDUST.COM ",
-      })
+      should contain_exec('ipa_installer').with_command(/\/usr\/sbin\/ipa-client-install\s+--password\s+unicorns\s+--realm\s+PIXIEDUST.COM\s+--unattended\s+--force\s+--server\s+ipa01.pixiedust.com\s+--domain pixiedust.com\s+--principal\s+rainbows\\@PIXIEDUST.COM\s+/)
     end
 
     it "should set krb5.conf to use the virutal host" do
@@ -226,6 +224,56 @@ describe 'ipaclient' do
         aug_get("database[. = 'sudoers']/service[1]").should == 'files'
         aug_get("database[. = 'sudoers']/service[2]").should == 'sss'
       end
+    end
+  end
+
+  # Allow $ipa_server to be an array
+  context "IPA Server List is Array" do
+    let(:facts) {
+      default_facts.merge({
+        :osfamily        => 'RedHat',
+        :operatingsystem => 'Fedora',
+      })
+    }
+
+    let(:params) {
+      {
+        :manual_register => false,
+        :mkhomedir       => true,
+        :ipa_server      => ["ipa01.example.com", "ipa02.example.com"],
+        :join_pw         => "unicorns",
+        :ipa_options     => "--permit",
+      }
+    }
+
+    it "should generate the right command" do
+      should contain_exec('ipa_installer').
+        with_command(/\/usr\/sbin\/ipa-client-install\s+--password unicorns\s+--unattended\s+--force\s+--mkhomedir\s+--server\s+ipa01.example.com\s+--server\s+ipa02.example.com\s+--permit/)
+    end
+  end
+
+  # Allow $ipa_server to be a string
+  context "IPA Server List is Array" do
+    let(:facts) {
+      default_facts.merge({
+        :osfamily        => 'RedHat',
+        :operatingsystem => 'Fedora',
+      })
+    }
+
+    let(:params) {
+      {
+        :manual_register => false,
+        :mkhomedir       => true,
+        :ipa_server      => "ipa01.example.com", 
+        :join_pw         => "unicorns",
+        :ipa_options     => "--permit",
+      }
+    }
+
+    it "should generate the right command" do
+      should contain_exec('ipa_installer').
+        with_command(/\/usr\/sbin\/ipa-client-install\s+--password unicorns\s+--unattended\s+--force\s+--mkhomedir\s+--server\s+ipa01.example.com\s+--permit/)
     end
   end
 end
