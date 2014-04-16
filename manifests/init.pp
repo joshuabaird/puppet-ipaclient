@@ -136,22 +136,22 @@ class ipaclient (
     }
   }
 
-  # Add nisdomain to /etc/rc.local & make it live
-  # According to https://access.redhat.com/site/solutions/180193
-  # and https://docs.fedoraproject.org/en-US/Fedora/18/html/FreeIPA_Guide/example-configuring-sudo.html
-
-  exec { 'add_nisdomain':
-    command => "/bin/echo nisdomainname ${ipa_domain} >> /etc/rc.local",
-    unless  => "/bin/grep -q \"nisdomainname ${ipa_domain}\" /etc/rc.local",
-  }
-
-  exec { 'nisdomain_live':
-    command => "/bin/nisdomainname ${ipa_domain}",
-    unless  => "/bin/nisdomainname | grep -q ${ipa_domain}",
-  }
-
   # Setup sudoers to look at FreeIPA LDAP
   if $enable_sudo {
+     # Add nisdomain to /etc/rc.local & make it live
+     # According to https://access.redhat.com/site/solutions/180193
+     # and https://docs.fedoraproject.org/en-US/Fedora/18/html/FreeIPA_Guide/example-configuring-sudo.html
+
+     exec { 'add_nisdomain':
+        command => "/bin/echo nisdomainname ${ipa_domain} >> /etc/rc.local",
+        unless  => "/bin/grep -q \"nisdomainname ${ipa_domain}\" /etc/rc.local",
+    }
+
+    exec { 'nisdomain_live':
+        command => "/bin/nisdomainname ${ipa_domain}",
+        unless  => "/bin/nisdomainname | grep -q ${ipa_domain}",
+    }
+
     file { '/etc/sudo-ldap.conf':
       ensure      => present,
       owner       => root,
