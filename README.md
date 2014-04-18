@@ -15,6 +15,43 @@ Supported Platforms
 Tested on RHEL 6, CentOS 6, and Fedora 20.  It should work on any
 Red Hat family OS that has IPA packages.
 
+
+Examples
+--------
+
+Discovery register:
+
+
+    class { 'ipaclient':
+      join_pw => "rainbows"
+    }
+
+All features:
+
+    class { 'ipaclient':
+       manual_reigster => true,
+       mkhomedir       => true,
+       join_pw         => "unicorns",
+       join_user       => "rainbows",
+       enrollment_host => "ipa01.pixiedust.com",
+       ipa_server      => "ipa.pixiedust.com",
+       ipa_domain      => "pixiedust.com",
+       ipa_realm       => "PIXEDUST.COM",
+       replicas        => ["ipa01.pixiedust.com", "ipa02.pixiedust.com"]
+       domain_dn       => "dc=pixiedust,dc=com",
+       sudo_bindpw     => "sprinkles",
+    }
+
+
+Sudoers only:
+
+    class { 'ipaclient::sudoers':
+       replicas        => ["ipa01.pixiedust.com", "ipa02.pixiedust.com"]
+       domain_dn       => "dc=pixiedust,dc=com",
+       sudo_bindpw     => "sprinkles",
+       ipa_domain      => "pixiedust.com",
+    }
+
 Load Balanced FreeIPA
 ---------------------
 

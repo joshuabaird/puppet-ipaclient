@@ -41,13 +41,13 @@
 #
 # Discovery register example:
 #
-#  class { ipaclient:
+#  class { 'ipaclient':
 #       join_pw         => "rainbows"
 #  }
 #
 # Manual register example:
 #
-#  class { ipaclient:
+#  class { 'ipaclient':
 #       manual_reigster => true,
 #       mkhomedir       => true,
 #       join_pw         => "unicorns",
@@ -138,42 +138,12 @@ class ipaclient (
 
   # Setup sudoers to look at FreeIPA LDAP
   if $enable_sudo {
-     # Add nisdomain to /etc/rc.local & make it live
-     # According to https://access.redhat.com/site/solutions/180193
-     # and https://docs.fedoraproject.org/en-US/Fedora/18/html/FreeIPA_Guide/example-configuring-sudo.html
-
-     exec { 'add_nisdomain':
-        command => "/bin/echo nisdomainname ${ipa_domain} >> /etc/rc.local",
-        unless  => "/bin/grep -q \"nisdomainname ${ipa_domain}\" /etc/rc.local",
-    }
-
-    exec { 'nisdomain_live':
-        command => "/bin/nisdomainname ${ipa_domain}",
-        unless  => "/bin/nisdomainname | grep -q ${ipa_domain}",
-    }
-
-    file { '/etc/sudo-ldap.conf':
-      ensure      => present,
-      owner       => root,
-      group       => root,
-      mode        => '0440',
-      content     => template('ipaclient/sudo-ldap.erb'),
+     class { 'ipaclient::sudoers':
+        replicas    => $replicas,
+        domain_dn   => $domain_dn,
+        sudo_bindpw => $sudo_bindpw,
+        ipa_domain  => $ipa_domain,
      }
-
-    if $::operatingsystem == "Fedora" {
-        $ldap_service = "sss"
-    } else {
-        $ldap_service = "ldap"
-    }
-
-    augeas { 'nsswitch_sudoers':
-      context => '/files/etc/nsswitch.conf',
-      changes => [
-        "set /files/etc/nsswitch.conf/database[. = 'sudoers'] sudoers",
-        "set /files/etc/nsswitch.conf/database[. = 'sudoers']/service[1] files",
-        "set /files/etc/nsswitch.conf/database[. = 'sudoers']/service[2] ${ldap_service}",
-      ],
-    }
   }
 }
 

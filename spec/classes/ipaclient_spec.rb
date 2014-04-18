@@ -66,11 +66,7 @@ describe 'ipaclient' do
     end
 
     it "should not configure sudo" do
-      should_not contain_file('/etc/sudo-ldap.conf')
-    end
-
-    it "should not configure nsswitch.conf" do
-      should_not contain_augeas('nsswitch_sudoers')
+      should_not contain_class('ipaclient::sudoers')
     end
   end
 
@@ -125,38 +121,14 @@ describe 'ipaclient' do
         with_content(/default_domain = pixiedust.com/)
     end
 
-    it "should set the host nisdomain" do
-      should contain_exec('add_nisdomain').with({
-        'command' => '/bin/echo nisdomainname pixiedust.com >> /etc/rc.local',
-      })
-    end
-
-    it "should make the nisdomain live now" do
-      should contain_exec('nisdomain_live').with({
-        'command' => '/bin/nisdomainname pixiedust.com',
-      })
-    end
-
       
-    it "should configure sudo-ldap" do
-      should contain_file('/etc/sudo-ldap.conf').with({
-        'ensure'  => 'present',
-        'owner'   => 'root',
-        'group'   => 'root',
-        'mode'    => '0440'
+    it "should configure sudoers" do
+      should contain_class('ipaclient::sudoers').with({
+        'ipa_domain'  => 'pixiedust.com',
+        'replicas'    => ["ipa01.pixiedust.com, ipa02.pixiedust.com"],
+        'domain_dn'   => "dc=pixiedust,dc=com",
+        'sudo_bindpw' => 'unicorns'
       })
-    end
-
-    it "should configure nsswitch" do
-      should contain_augeas('nsswitch_sudoers')
-    end
-
-    describe_augeas 'nsswitch_sudoers', :lens => 'Nsswitch', :target => 'etc/nsswitch.conf' do
-      it 'should set sudoers database to files ldap' do
-        should execute
-        aug_get("database[. = 'sudoers']/service[1]").should == 'files'
-        aug_get("database[. = 'sudoers']/service[2]").should == 'ldap'
-      end
     end
   end
 
@@ -179,51 +151,6 @@ describe 'ipaclient' do
 
     it "should have the right package name"  do
       should contain_package('ipa-client')
-    end
-  end
-
-  context "Fedora - Manual Install with All Features" do
-    let(:facts) {
-      default_facts.merge({
-        :osfamily        => 'RedHat',
-        :operatingsystem => 'Fedora',
-      })
-    }
-
-    let(:params) {
-      {
-        :manual_register => true,
-        :mkhomedir       => false,
-        :join_pw         => "unicorns",
-        :join_user       => "rainbows",
-        :enrollment_host => "ipa01.pixiedust.com",
-        :ipa_server      => "ipa.pixiedust.com",
-        :ipa_domain      => "pixiedust.com",
-        :ipa_realm       => "PIXIEDUST.COM",
-        :replicas        => ["ipa01.pixiedust.com, ipa02.pixiedust.com"],
-        :domain_dn       => "dc=pixiedust,dc=com",
-        :sudo_bindpw     => "unicorns",
-        :enable_sudo     => true,
-      }
-    }
-
-    it "should install the right package" do
-      should contain_package('freeipa-client').with({
-        'ensure'  => 'installed'
-      })
-    end
-
-    it "should configure nsswitch" do
-      should contain_augeas('nsswitch_sudoers')
-    end
-
-    # spec for fedora is different, ldap nsswitch service is sss
-    describe_augeas 'nsswitch_sudoers', :lens => 'Nsswitch', :target => 'etc/nsswitch.conf' do
-      it 'should set sudoers database to files ldap' do
-        should execute
-        aug_get("database[. = 'sudoers']/service[1]").should == 'files'
-        aug_get("database[. = 'sudoers']/service[2]").should == 'sss'
-      end
     end
   end
 
