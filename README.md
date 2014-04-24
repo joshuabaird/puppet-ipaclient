@@ -1,13 +1,13 @@
 [![Build Status](https://travis-ci.org/stbenjam/puppet-ipaclient.svg?branch=master)](https://travis-ci.org/stbenjam/puppet-ipaclient)
 
-
 IPAclient
 ========
 
 This module supports configuring clients to use FreeIPA.
 
-Full documentation including examples and descriptions of
-parameters are in manifests/init.pp.
+_Version 2 of this module is not backwards compatible
+with previous versions of this module. Parameter names
+have been renamed to be more sensible._
 
 Supported Platforms
 -------------------
@@ -15,60 +15,72 @@ Supported Platforms
 Tested on RHEL 6, CentOS 6, and Fedora 20.  It should work on any
 Red Hat family OS that has IPA packages.
 
-
 Examples
 --------
 
+See the manifests for full descriptions of the various parameters
+available.
+
 Discovery register:
 
-
     class { 'ipaclient':
-      join_pw => "rainbows"
+      password => "rainbows"
     }
 
-All features:
+Another:
 
     class { 'ipaclient':
-       manual_reigster => true,
-       mkhomedir       => true,
-       join_pw         => "unicorns",
-       join_user       => "rainbows",
-       enrollment_host => "ipa01.pixiedust.com",
-       ipa_server      => "ipa.pixiedust.com",
-       ipa_domain      => "pixiedust.com",
-       ipa_realm       => "PIXEDUST.COM",
-       replicas        => ["ipa01.pixiedust.com", "ipa02.pixiedust.com"]
-       domain_dn       => "dc=pixiedust,dc=com",
-       sudo_bindpw     => "sprinkles",
+       user            => "admin",
+       password        => "unicorns",
+       server          => ["ipa01.pixiedust.com", "ipa02.pixiedust.com"]
+       domain          => "pixiedust.com",
+       realm           => "PIXEDUST.COM",
+       mkhomedir       => false,
+       automount       => true
+       fixed_primary   => true,
     }
 
+Default and simple sudoers:
 
-Sudoers only:
+    class { 'ipaclient::sudoers': }
+
+Manual sudoers:
 
     class { 'ipaclient::sudoers':
-       replicas        => ["ipa01.pixiedust.com", "ipa02.pixiedust.com"]
-       domain_dn       => "dc=pixiedust,dc=com",
-       sudo_bindpw     => "sprinkles",
-       ipa_domain      => "pixiedust.com",
+        server  => "_srv_, ipa01.pixiedust.com",
+        domain  => "pixiedust.com",
     }
 
-Load Balanced FreeIPA
----------------------
+Automounter only:
 
-An optional featue of this module is supporting a virtual hostname if
-you have more than one IPA server and cannot use the DNS service
-records for discovery.
+    class { 'ipaclient::automount':
+        location    => 'home',
+        server      => 'ipa01.pixiedust.com',
+    }
 
-When using a virtualhost, registration *must* occur to the real hostname
-of the IDM server ($enrollment\_host) then you can switch to using a 
-virtual host without problems ($ipa\_server).  LDAP replicas
-can be specified with the replicas parameter.
+Known Issues
+------------
 
-See manifests/init.pp for more info.
+You must run puppet twice to get sudo working the first time, because it
+relies on facts that are available AFTER ipa-client-install is run.
+
+A workaround is to load them separately, and set the sudoer configuration
+manually:
+
+    class { 'ipaclient':
+        sudo     => false,
+        password => 'password',
+    }
+
+    class { 'ipaclient::sudoers':
+        server    => "_srv_",
+        domain    => "pixiedust.com",
+        require   => Class['ipaclient'],
+    }
 
 MIT License
 -----------
-Copyright (c) 2013 Stephen Benjamin
+Copyright (c) 2014 Stephen Benjamin
 
 Permission is hereby granted, free of charge, to any person obtaining 
 a copy of this software and associated documentation files (the "Software"), 

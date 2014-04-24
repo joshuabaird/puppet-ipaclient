@@ -1,6 +1,7 @@
 ---
 before_install:
   - sudo apt-get install -qq augeas-tools augeas-lenses libaugeas-dev
+  - sudo wget -O /usr/share/augeas/lenses/sssd.aug https://raw.githubusercontent.com/hercules-team/augeas/master/lenses/sssd.aug
 language: ruby
 script: "rake spec"
 rvm:

@@ -4,22 +4,15 @@
 #
 # === Parameters
 #
-# $ipa_domain::            IPA domain name
+# By default, we'll get these values from Facter.
 #
-# $domain_dn::             DN, e.g. dc=pixiedust,dc=com
+# $domain::            IPA domain name
 #
-# $replicas::              Array of IPA servers (for sudo failover)
-#
-# $sudo_bindpw::           Password for LDAP sudo bind
+# $server::            Comma-separated list of servers
 #
 # === Examples
 #
-#  class { 'ipaclient::sudoers':
-#       replicas        => ["ipa01.pixiedust.com", "ipa02.pixiedust.com"]
-#       domain_dn       => "dc=pixiedust,dc=com",
-#       sudo_bindpw     => "sprinkles",
-#       ipa_domain      => "pixiedust.com",
-#  }
+# class { 'ipaclient::sudoers': }
 #
 # === Authors
 #
@@ -31,47 +24,81 @@
 # Released under the MIT License. See LICENSE for more information
 #
 class ipaclient::sudoers (
-  $replicas        = $ipaclient::params::replicas,
-  $domain_dn       = $ipaclient::params::domain_dn,
-  $sudo_bindpw     = $ipaclient::params::sudo_bindpw,
-  $ipa_domain      = $ipaclient::params::ipa_domain,
-) inherits ipaclient::params {
+  $server      = $::ipa_server,
+  $domain      = $::ipa_domain
+) {
 
-  validate_array($replicas)
-  validate_string($domain_dn, $sudo_bindpw)
-
-  # Add nisdomain to /etc/rc.local & make it live
-  # According to https://access.redhat.com/site/solutions/180193
-  # and https://docs.fedoraproject.org/en-US/Fedora/18/html/FreeIPA_Guide/example-configuring-sudo.html
-
-  exec { 'add_nisdomain':
-    command => "/bin/echo nisdomainname ${ipa_domain} >> /etc/rc.local",
-    unless  => "/bin/grep -q \"nisdomainname ${ipa_domain}\" /etc/rc.local",
+  package { 'libsss_sudo':
+    ensure  => installed,
   }
 
-  exec { 'nisdomain_live':
-    command => "/bin/nisdomainname ${ipa_domain}",
-    unless  => "/bin/nisdomainname | grep -q ${ipa_domain}",
-  }
+  if !empty($server) and !empty($domain) {
+      $realm = upcase($domain)
 
-  file { '/etc/sudo-ldap.conf':
-    ensure      => present,
-    owner       => root,
-    group       => root,
-    mode        => '0440',
-    content     => template('ipaclient/sudo-ldap.erb'),
+      service { 'sssd':
+        ensure  => running,
+        enable  => true,    
+        require => Package['libsss_sudo'],
+      }
+
+      exec { 'nisdomain':
+        command => shellquote('/usr/sbin/authconfig','--nisdomain',"${domain}",'--update'),
+        unless  => shellquote('/bin/grep','-q',"NISDOMAIN=${domain}",'/etc/sysconfig/network'),
+      }
+
+      augeas { 'nsswitch_sudoers':
+        context => '/files/etc/nsswitch.conf',
+        changes => [
+          "set database[. = 'sudoers'] sudoers",
+          "set database[. = 'sudoers']/service[1] files",
+          "set database[. = 'sudoers']/service[2] sss",
+        ],
+      }
+
+      if (versioncmp($::sssd_version, '1.11') >= 0) {
+        # SSSD versions >= 1.11 support using the IPA sudo_provider
+        # which is vastly simpler to configure
+        augeas { 'sssd':
+          context => '/files/etc/sssd/sssd.conf',
+          changes => [
+            'set target[1]/sudo_provider ipa',
+            'set target[2]/services "nss, pam, ssh, sudo"',
+          ],
+          notify  => Service['sssd'],
+        }
+      } else {
+        # SSSD < 1.11 needs to use the more complex LDAP provider
+        $krb5_server = join(values_at(split($server, ","), 0), "")
+        $dn = join(prefix(split($domain, "\."), "dc="), ",")
+
+        # Generate correct ldap:// uris, but _srv_ doesn't get a prefix, this is all a bit tricky and ugly
+        $tmp_ldap_uri = join(prefix(delete(split(regsubst($server, "\s+", "", "G"), ","), "_srv_"), "ldap://"), ", ")
+
+        if member(split(regsubst($server, "\s+", "", "G") , ","), "_srv_") {
+            if empty($tmp_ldap_uri) {
+                $ldap_uri = "_srv_"
+            } else {
+                $ldap_uri = "_srv_, ${tmp_ldap_uri}"
+            }
+        } else {
+            $ldap_uri = $tmp_ldap_uri
+        }
+
+        augeas { 'sssd':
+          context => '/files/etc/sssd/sssd.conf',
+          changes => [
+            'set target[1]/sudo_provider ldap',
+            "set target[1]/ldap_uri \"${ldap_uri}\"",
+            "set target[1]/ldap_sudo_search_base ou=SUDOers,${dn}",
+            'set target[1]/ldap_sasl_mech GSSAPI',
+            "set target[1]/ldap_sasl_authid host/${::fqdn}",
+            "set target[1]/ldap_sasl_realm ${realm}",
+            "set target[1]/krb5_server ${krb5_server}", 
+            'set target[2]/services "nss, pam, ssh, sudo"',
+          ],
+          notify  => Service['sssd'],
+        }
+      }
    }
-
-  if $::operatingsystem == "Fedora" { $ldap_service = "sss" }
-  else                              { $ldap_service = "ldap" }
-
-  augeas { 'nsswitch_sudoers':
-    context => '/files/etc/nsswitch.conf',
-    changes => [
-      "set /files/etc/nsswitch.conf/database[. = 'sudoers'] sudoers",
-      "set /files/etc/nsswitch.conf/database[. = 'sudoers']/service[1] files",
-      "set /files/etc/nsswitch.conf/database[. = 'sudoers']/service[2] ${ldap_service}",
-    ],
-  }
 }
 

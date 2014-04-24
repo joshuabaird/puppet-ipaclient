@@ -4,61 +4,64 @@
 #
 # === Parameters
 #
-# Required Parameters (if relying on DNS discovery):
-#   join_pw
+# Minimum Parameters (if relying on DNS discovery):
+#   password
 #
 # All Parameters:
 #
-# $manual_register::       Use DNS autodetection (default) or specify settings yourself for IPA
+# $automount::             Enable automount
+#                          Default: false
 #
-# $domain_dn::             DN, e.g. dc=pixiedust,dc=com
+# $automount_location::    Automounter location
 #
-# $enable_sudo::           Lookup sudoer rights in IPA
+# $automount_server::      Automounter server
 #
-# $enrollment_host::       Specific IPA server to register to (e.g., ipa01.pixiedust.com).  Only
-#                          needed when $ipa_server is a virtual hostname.
+# $domain::                Domain, e.g. pixiedust.com
 #
-# $ipa_domain::            Domain, e.g. pixiedust.com
+# $fixed_primary::         Used a fixed primary
+#                          Default: false
 #
-# $ipa_realm::             Realm, e.g. PIXIEDUST.COM
-#
-# $ipa_server::            Can be a virtual host (e.g. ipa.pixiedust.com), or an array of IPA servers.
-#                          When using a virtual host, $enrollment_host must point to a real IPA server.
-#
-# $ipa_options::           Additional command-line options to pass directly to installer
-#
-# $join_pw::               One-time password, or registration user's password
-#
-# $join_user::             When not using one-time passwords, a.k.a. principal in IPA terminology
+# $installer::             IPA install command
 #
 # $mkhomedir::             Automatically make /home/<user> or not
+#                          Default: true
+# $options::               Additional command-line options to pass directly to installer
 #
-# $replicas::              Array of IPA servers (for sudo failover)
+# $package::               Package to install
 #
-# $sudo_bindpw::           Password for LDAP sudo bind
+# $password::              One-time password, or registration user's password
+#
+# $principal::             Kerberos principal when not using one-time passwords
+#
+# $realm::                 Realm, e.g. PIXIEDUST.COM
+#
+# $server::                Can be array or string of IPA servers
+#
+# $ssh::                   Enable SSH Integation
+#                          Default: true
+#
+# $sudo::                  Enable sudoers management
+#                          Default: true
+#
 #
 # === Examples
 #
 # Discovery register example:
 #
 #  class { 'ipaclient':
-#       join_pw         => "rainbows"
+#       password         => "rainbows"
 #  }
 #
-# Manual register example:
+# More complex:
 #
 #  class { 'ipaclient':
-#       manual_reigster => true,
-#       mkhomedir       => true,
-#       join_pw         => "unicorns",
-#       join_user       => "rainbows",
-#       enrollment_host => "ipa01.pixiedust.com",
-#       ipa_server      => "ipa.pixiedust.com",
-#       ipa_domain      => "pixiedust.com",
-#       ipa_realm       => "PIXEDUST.COM",
-#       replicas        => ["ipa01.pixiedust.com", "ipa02.pixiedust.com"]
-#       domain_dn       => "dc=pixiedust,dc=com",
-#       sudo_bindpw     => "sprinkles",
+#       mkhomedir          => false,
+#       automount          => true,
+#       automount_location => "home",
+#       password           => "unicorns",
+#       domain             => "pixiedust.com",
+#       realm              => "PIXEDUST.COM",
+#       server             => ["ipa01.pixiedust.com", "ipa02.pixiedust.com"]
 #  }
 #
 # === Authors
@@ -67,83 +70,74 @@
 #
 # === Copyright
 #
-# Copyright 2013 Stephen Benjamin.
+# Copyright 2014 Stephen Benjamin.
 # Released under the MIT License. See LICENSE for more information
 #
 class ipaclient (
-  $manual_register = $ipaclient::params::manual_register,
-  $mkhomedir       = $ipaclient::params::mkhomedir,
-  $join_pw         = $ipaclient::params::join_pw,
-  $join_user       = $ipaclient::params::join_user,
-  $enrollment_host = $ipaclient::params::enrollment_host,
-  $ipa_server      = $ipaclient::params::ipa_server,
-  $ipa_domain      = $ipaclient::params::ipa_domain,
-  $ipa_realm       = $ipaclient::params::ipa_realm,
-  $replicas        = $ipaclient::params::replicas,
-  $domain_dn       = $ipaclient::params::domain_dn,
-  $enable_sudo     = $ipaclient::params::enable_sudo,
-  $sudo_bindpw     = $ipaclient::params::sudo_bindpw,
-  $ipa_package     = $ipaclient::params::ipa_package,
-  $ipa_installer   = $ipaclient::params::ipa_installer,
-  $ipa_options     = $ipaclient::params::ipa_options,
+  $automount          = $ipaclient::params::automount,
+  $automount_location = $ipaclient::params::automount_location,
+  $automount_server   = $ipaclient::params::automount_server,
+  $domain             = $ipaclient::params::domain,
+  $fixed_primary      = $ipaclient::params::fixed_primary,
+  $installer          = $ipaclient::params::installer,
+  $mkhomedir          = $ipaclient::params::mkhomedir,
+  $options            = $ipaclient::params::options,
+  $package            = $ipaclient::params::package,
+  $password           = $ipaclient::params::password,
+  $principal          = $ipaclient::params::principal,
+  $realm              = $ipaclient::params::realm,
+  $server             = $ipaclient::params::server,
+  $ssh                = $ipaclient::params::ssh,
+  $sudo               = $ipaclient::params::sudo
 ) inherits ipaclient::params {
 
-  validate_array($replicas)
-  validate_bool($manual_register, $enable_sudo, $mkhomedir)
-  validate_string($join_pw, $join_user, $enrollment_host,
-                  $ipa_realm, $domain_dn, $sudo_bindpw,
-                  $ipa_package, $ipa_installer, $ipa_options)
-
-  package { $ipa_package:
+  package { $package:
     ensure      => installed,
   }
 
-  if $join_pw   == 'UNSET' { fail('Require at least a join password') }
-  if $ipa_realm != 'UNSET' { $realm   = "--realm ${ipa_realm}" }
-  if $join_user            { $user    = "--principal ${join_user}\\@${ipa_realm}"}
-  if $mkhomedir            { $homedir = ' --mkhomedir'}
-  if $enrollment_host      { $enroll  = "--server ${enrollment_host}" }
-  if $ipa_domain           { $dom     = "--domain ${ipa_domain}" }
-
-  # Support $ipa_server as an array
-  if $ipa_server and empty($enrollment_host) { 
-    if is_array($ipa_server) {
-        $server_list = join($ipa_server, " --server ")
-    } else {
-        $server_list = $ipa_server
-    }
-    $server = "--server ${server_list}"
+  if empty($password) {
+    fail('Require at least a join password')
+  } else {
+    $opt_password = ['--password', "${password}"]
   }
+  
+  if is_array($server) {
+    # Transform ['a','b'] -> ['--server','a','--server','b']
+    $opt_server = split(join(prefix($server, "--server|"), "|"), '\|')
+  } elsif !empty($server) {
+    $opt_server = ['--server' ,"${server}"]
+  } 
 
-  $command = "${ipa_installer} --password ${join_pw} ${realm} --unattended --force ${homedir} ${enroll} ${server} ${dom} ${user} ${ipa_options}"
+  if $domain    { $opt_domain    = ['--domain', "${domain}"] }
+  if $realm     { $opt_realm     = ['--realm', "${realm}"] }
+  if $principal { $opt_principal = ['--principal', "${principal}@${realm}"] }
+  
+  if !str2bool($ssh)          { $opt_ssh           = "--no-ssh" }
+  if str2bool($fixed_primary) { $opt_fixed_primary = '--fixed-primary' }
+  if str2bool($mkhomedir)     { $opt_mkhomedir     = '--mkhomedir' }
 
-  # Run the installer
+  # regsubst due to PUP-2361
+  $command = regsubst(regsubst(shellquote($installer,$opt_realm,$opt_password,$opt_principal,$opt_mkhomedir,$opt_domain,
+                               $opt_server,$opt_fixed_primary,$opt_ssh,$options,'--force','--unattended'), "\\\"\\\"", "", "G"), "\s+", " ", "G")
+
   exec { 'ipa_installer':
     command     => $command,
     unless      => '/usr/sbin/ipa-client-install --unattended 2>&1 | /bin/grep -q "already configured"',
-    require     => Package[$ipa_package],
+    require     => Package[$package],
   }
 
-  # Support vip configuration -- only if manual configuration, and only if we're not an ipa server
-  if $manual_register == true and $is_ipa_server == false {
-    file { '/etc/krb5.conf':
-      ensure      => present,
-      owner       => root,
-      group       => root,
-      mode        => '0644',
-      content     => template('ipaclient/krb5.erb'),
-      require     => Exec['ipa_installer'],
-    }
-  }
-
-  # Setup sudoers to look at FreeIPA LDAP
-  if $enable_sudo {
+  if str2bool($sudo) {
      class { 'ipaclient::sudoers':
-        replicas    => $replicas,
-        domain_dn   => $domain_dn,
-        sudo_bindpw => $sudo_bindpw,
-        ipa_domain  => $ipa_domain,
+        require => Exec["ipa_installer"],
      }
+  }
+
+  if str2bool($automount) {
+    class { 'ipaclient::automount':
+        location => $automount_location,
+        server   => $automount_server,
+        require  => Exec["ipa_installer"],
+    }
   }
 }
 

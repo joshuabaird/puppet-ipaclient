@@ -1,79 +1,98 @@
 require 'spec_helper'
 
 describe 'ipaclient::sudoers' do
-  context "Fedora Sudo Configuration" do
-    let(:facts) { { :osfamily => 'RedHat', :operatingsystem => 'Fedora' } }
+  context "SSSD < 1.11" do
+    let :facts do {
+      :ipa_domain    => 'pixiedust.com',
+      :fqdn          => 'host.pixiedust.com',
+      :sssd_version  => '1.9.2'
+    } end
 
-    let(:params) {
-      {
-        :sudo_bindpw     => "unicorns",
-        :replicas        => ["ipa01.example.com", "ipa02.example.com"],
-        :domain_dn       => "dc=pixiedust,dc=com",
-        :ipa_domain      => "pixiedust.com",
-      }
-    }
+    describe "with srv record" do
+      let(:params) do {
+        :server => "_srv_, ipa01.pixiedust.com, ipa02.pixiedust.com"
+      } end
 
-    it "should set the host nisdomain" do
-      should contain_exec('add_nisdomain').with({
-        'command' => '/bin/echo nisdomainname pixiedust.com >> /etc/rc.local',
-      })
+      it "should set the host nisdomain" do
+        should contain_exec('nisdomain').with({
+          'command' => '/usr/sbin/authconfig --nisdomain pixiedust.com --update',
+        })
+      end
+
+      it "should configure sssd" do
+        should contain_augeas('sssd')
+      end
+
+      describe_augeas 'sssd', :lens => 'Sssd', :target => 'etc/sssd/sssd.conf' do
+        it 'should configure sssd to use ldap sudo provider' do
+          should execute.with_change
+          aug_get("target[1]/sudo_provider").should == "ldap"
+          aug_get("target[1]/ldap_uri").should == "_srv_, ldap://ipa01.pixiedust.com, ldap://ipa02.pixiedust.com"
+          aug_get("target[1]/ldap_sudo_search_base").should == "ou=SUDOers,dc=pixiedust,dc=com"
+          aug_get("target[1]/ldap_sasl_mech").should == "GSSAPI"
+          aug_get("target[1]/ldap_sasl_authid").should == "host/host.pixiedust.com"
+          aug_get("target[1]/ldap_sasl_realm").should == "PIXIEDUST.COM"
+          aug_get("target[1]/krb5_server").should == "_srv_"
+          aug_get("target[2]/services").should == "nss, pam, ssh, sudo"
+          should execute.idempotently
+        end
+      end
+
+      it "should configure nsswitch" do
+        should contain_augeas('nsswitch_sudoers')
+      end
+
+      describe_augeas 'nsswitch_sudoers', :lens => 'Nsswitch', :target => 'etc/nsswitch.conf' do
+        it 'should set sudoers database to files sss' do
+          should execute.with_change
+          aug_get("database[. = 'sudoers']/service[1]").should == 'files'
+          aug_get("database[. = 'sudoers']/service[2]").should == 'sss'
+          should execute.idempotently
+        end
+      end
     end
 
-    it "should make the nisdomain live now" do
-      should contain_exec('nisdomain_live').with({
-        'command' => '/bin/nisdomainname pixiedust.com',
-      })
-    end
+    describe "without srv records" do
+      let :params do {
+        :server => "ipa01.pixiedust.com, ipa02.pixiedust.com" 
+      } end
 
-      
-    it "should configure sudo-ldap" do
-      should contain_file('/etc/sudo-ldap.conf').with({
-        'ensure'  => 'present',
-        'owner'   => 'root',
-        'group'   => 'root',
-        'mode'    => '0440'
-      }).with_content(/binddn uid=sudo,cn=sysaccounts,cn=etc,dc=pixiedust,dc=com/)
-        .with_content(/bindpw unicorns/)
-        .with_content(/sudoers_base ou=SUDOers,dc=pixiedust,dc=com/)
-        .with_content(/uri ldap:\/\/ipa01.example.com ldap:\/\/ipa02.example.com/)
-    end
-
-    it "should configure nsswitch" do
-      should contain_augeas('nsswitch_sudoers')
-    end
-
-    describe_augeas 'nsswitch_sudoers', :lens => 'Nsswitch', :target => 'etc/nsswitch.conf' do
-      it 'should set sudoers database to files ldap' do
-        should execute
-        aug_get("database[. = 'sudoers']/service[1]").should == 'files'
-        aug_get("database[. = 'sudoers']/service[2]").should == 'sss'
+      describe_augeas 'sssd', :lens => 'Sssd', :target => 'etc/sssd/sssd.conf' do
+        it 'should configure sssd to use ldap sudo provider' do
+          should execute.with_change
+          aug_get("target[1]/sudo_provider").should == "ldap"
+          aug_get("target[1]/ldap_uri").should == "ldap://ipa01.pixiedust.com, ldap://ipa02.pixiedust.com"
+          aug_get("target[1]/ldap_sudo_search_base").should == "ou=SUDOers,dc=pixiedust,dc=com"
+          aug_get("target[1]/ldap_sasl_mech").should == "GSSAPI"
+          aug_get("target[1]/ldap_sasl_authid").should == "host/host.pixiedust.com"
+          aug_get("target[1]/ldap_sasl_realm").should == "PIXIEDUST.COM"
+          aug_get("target[1]/krb5_server").should == "ipa01.pixiedust.com"
+          aug_get("target[2]/services").should == "nss, pam, ssh, sudo"
+          should execute.idempotently
+        end
       end
     end
   end
 
-  context 'RHEL-Compatible Sudoers' do
-    let(:facts) { { :osfamily => 'RedHat', :operatingsystem => 'CentOS' } }
+  context "SSSD >= 1.11" do
+    let :facts do {
+      :ipa_domain    => 'pixiedust.com',
+      :ipa_server    => '_srv_, ipa01.pixiedust.com, ipa02.pixiedust.com',
+      :fqdn          => 'host.pixiedust.com',
+      :sssd_version  => '1.11',
+    } end
 
-    let(:params) {
-      {
-        :sudo_bindpw     => "unicorns",
-        :replicas        => ["ipa01.example.com", "ipa02.example.com"],
-        :domain_dn       => "dc=pixiedust,dc=com",
-        :ipa_domain      => "pixiedust.com",
-      }
-    }
-
-    it "should configure nsswitch" do
-      should contain_augeas('nsswitch_sudoers')
+    it "should configure sssd" do
+      should contain_augeas('sssd')
     end
 
-    describe_augeas 'nsswitch_sudoers', :lens => 'Nsswitch', :target => 'etc/nsswitch.conf' do
-      it 'should set sudoers database to files ldap' do
-        should execute
-        aug_get("database[. = 'sudoers']/service[1]").should == 'files'
-        aug_get("database[. = 'sudoers']/service[2]").should == 'ldap'
+    describe_augeas 'sssd', :lens => 'Sssd', :target => 'etc/sssd/sssd.conf' do
+      it 'should configure sssd to use ipa sudo provider' do
+        should execute.with_change
+        aug_get("target[1]/sudo_provider").should == "ipa"
+        aug_get("target[2]/services").should == "nss, pam, ssh, sudo"
+        should execute.idempotently
       end
     end
   end
 end
-
