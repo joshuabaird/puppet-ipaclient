@@ -5,9 +5,13 @@ IPAclient
 
 This module supports configuring clients to use FreeIPA.
 
-_Version 2 of this module is not backwards compatible
-with previous versions of this module. Parameter names
-have been renamed to be more sensible._
+What's New
+----------
+
+Version 2 of this module has more features, like
+simplifying the way that sudoers is configured and
+managed.  Note that it's not backwards compatible
+with 1.x and 0.x versions of this module.
 
 Supported Platforms
 -------------------
