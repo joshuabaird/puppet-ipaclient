@@ -28,6 +28,9 @@ class ipaclient::params {
         }
       }
     }
+    Debian: {
+        $package = 'freeipa-client'
+    }
     default: {
       fail("${::hostname}: This module does not support operatingsystem ${::operatingsystem}")
     }

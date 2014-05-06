@@ -1,11 +1,12 @@
 require 'spec_helper'
 
 describe 'ipaclient::sudoers' do
-  context "SSSD < 1.11" do
+  context "RedHat SSSD < 1.11" do
     let :facts do {
       :ipa_domain    => 'pixiedust.com',
       :fqdn          => 'host.pixiedust.com',
-      :sssd_version  => '1.9.2'
+      :sssd_version  => '1.9.2',
+      :osfamily      => "RedHat"
     } end
 
     describe "with srv record" do
@@ -17,6 +18,10 @@ describe 'ipaclient::sudoers' do
         should contain_exec('nisdomain').with({
           'command' => '/usr/sbin/authconfig --nisdomain pixiedust.com --update',
         })
+      end
+
+      it "should install libsss sudo package" do
+        should contain_package("libsss_sudo")
       end
 
       it "should configure sssd" do
@@ -74,12 +79,13 @@ describe 'ipaclient::sudoers' do
     end
   end
 
-  context "SSSD >= 1.11" do
+  context "RedHat SSSD >= 1.11" do
     let :facts do {
       :ipa_domain    => 'pixiedust.com',
       :ipa_server    => '_srv_, ipa01.pixiedust.com, ipa02.pixiedust.com',
       :fqdn          => 'host.pixiedust.com',
       :sssd_version  => '1.11',
+      :osfamily      => 'RedHat',
     } end
 
     it "should configure sssd" do
@@ -93,6 +99,35 @@ describe 'ipaclient::sudoers' do
         aug_get("target[2]/services").should == "nss, pam, ssh, sudo"
         should execute.idempotently
       end
+    end
+  end
+
+  context "Debian SSSD >= 1.11" do
+    let :facts do {
+      :ipa_domain    => 'pixiedust.com',
+      :fqdn          => 'host.pixiedust.com',
+      :sssd_version  => '1.9.2',
+      :osfamily      => "Debian"
+    } end
+
+    let(:params) do {
+      :server => "_srv_, ipa01.pixiedust.com, ipa02.pixiedust.com"
+    } end
+
+    it "should install libsss sudo package" do
+      should contain_package("libsss-sudo")
+    end
+
+    it "should set the host nisdomain" do
+      should contain_exec('nisdomain_live').with({
+        'command' => '/bin/nisdomainname pixiedust.com'
+      })
+    end
+
+    it "should make the nisdomain persistent on boot" do
+      should contain_file('/etc/init/nisdomain.conf').
+        with_content(/\/bin\/nisdomainname pixiedust.com/).
+        with_content(/start on runlevel \[2345\]/)
     end
   end
 end

@@ -95,35 +95,35 @@ class ipaclient (
     ensure      => installed,
   }
 
-  if empty($password) {
+  if empty($password) and !str2bool($::ipa_enrolled) {
     fail('Require at least a join password')
   } else {
     $opt_password = ['--password', "${password}"]
-  }
   
-  if is_array($server) {
-    # Transform ['a','b'] -> ['--server','a','--server','b']
-    $opt_server = split(join(prefix($server, "--server|"), "|"), '\|')
-  } elsif !empty($server) {
-    $opt_server = ['--server' ,"${server}"]
-  } 
-
-  if $domain    { $opt_domain    = ['--domain', "${domain}"] }
-  if $realm     { $opt_realm     = ['--realm', "${realm}"] }
-  if $principal { $opt_principal = ['--principal', "${principal}@${realm}"] }
+    if is_array($server) {
+      # Transform ['a','b'] -> ['--server','a','--server','b']
+      $opt_server = split(join(prefix($server, "--server|"), "|"), '\|')
+    } elsif !empty($server) {
+      $opt_server = ['--server' ,"${server}"]
+    } 
   
-  if !str2bool($ssh)          { $opt_ssh           = "--no-ssh" }
-  if str2bool($fixed_primary) { $opt_fixed_primary = '--fixed-primary' }
-  if str2bool($mkhomedir)     { $opt_mkhomedir     = '--mkhomedir' }
-
-  # regsubst due to PUP-2361
-  $command = regsubst(regsubst(shellquote($installer,$opt_realm,$opt_password,$opt_principal,$opt_mkhomedir,$opt_domain,
-                               $opt_server,$opt_fixed_primary,$opt_ssh,$options,'--force','--unattended'), "\\\"\\\"", "", "G"), "\s+", " ", "G")
-
-  exec { 'ipa_installer':
-    command     => $command,
-    unless      => '/usr/sbin/ipa-client-install --unattended 2>&1 | /bin/grep -q "already configured"',
-    require     => Package[$package],
+    if $domain    { $opt_domain    = ['--domain', "${domain}"] }
+    if $realm     { $opt_realm     = ['--realm', "${realm}"] }
+    if $principal { $opt_principal = ['--principal', "${principal}@${realm}"] }
+    
+    if !str2bool($ssh)          { $opt_ssh           = "--no-ssh" }
+    if str2bool($fixed_primary) { $opt_fixed_primary = '--fixed-primary' }
+    if str2bool($mkhomedir)     { $opt_mkhomedir     = '--mkhomedir' }
+  
+    # regsubst due to PUP-2361
+    $command = regsubst(regsubst(shellquote($installer,$opt_realm,$opt_password,$opt_principal,$opt_mkhomedir,$opt_domain,
+                                 $opt_server,$opt_fixed_primary,$opt_ssh,$options,'--force','--unattended'), "\\\"\\\"", "", "G"), "\s+", " ", "G")
+  
+    exec { 'ipa_installer':
+      command     => $command,
+      unless      => '/usr/sbin/ipa-client-install --unattended 2>&1 | /bin/grep -q "already configured"',
+      require     => Package[$package],
+    }
   }
 
   if str2bool($sudo) {

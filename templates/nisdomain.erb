@@ -1,0 +1,11 @@
+# Installed by the ipaclient puppet module
+description "sets the nisdomainanme"
+author "Stephen Benjamin <stephen@bitbin.de>"
+
+start on runlevel [2345]
+
+task
+script
+  /bin/nisdomainname <%= domain %> 
+end script
+
