@@ -8,6 +8,8 @@ This module supports configuring clients to use FreeIPA.
 What's New
 ----------
 
+Ubuntu support!
+
 Version 2 of this module has more features, like
 simplifying the way that sudoers is configured and
 managed.  Note that it's not backwards compatible
@@ -16,8 +18,13 @@ with 1.x and 0.x versions of this module.
 Supported Platforms
 -------------------
 
-Tested on RHEL 6, CentOS 6, and Fedora 20.  It should work on any
-Red Hat family OS that has IPA packages.
+Tested on:
+  * RHEL and CentOS 6
+  * Fedora 20
+  * Ubuntu 14.04
+
+It should hopefully work on any Red Hat or Debian
+family distro with IPA packages.
 
 Examples
 --------
