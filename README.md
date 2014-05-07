@@ -3,17 +3,18 @@
 IPAclient
 ========
 
-This module supports configuring clients to use FreeIPA.
+This module configures clients to use FreeIPA with as little fuss as possible.
+
+Feedback and pull requests are very welcome.
 
 What's New
 ----------
 
-Ubuntu support!
+(Experimental) Ubuntu support!
 
-Version 2 of this module has more features, like
-simplifying the way that sudoers is configured and
-managed.  Note that it's not backwards compatible
-with 1.x and 0.x versions of this module.
+Refactored parameters to have better names, version
+2.0 isn't compatible with previous versions of the
+module.
 
 Supported Platforms
 -------------------
@@ -23,8 +24,8 @@ Tested on:
   * Fedora 20
   * Ubuntu 14.04
 
-It should hopefully work on any Red Hat or Debian
-family distro with IPA packages.
+It should hopefully work on any recent Red Hat or Debian
+distro with IPA packages.  
 
 Examples
 --------
@@ -32,13 +33,13 @@ Examples
 See the manifests for full descriptions of the various parameters
 available.
 
-Discovery register:
+Discovery register (w/ sane defaults: sudo, mkhomedir, ssh, etc):
 
     class { 'ipaclient':
       password => "rainbows"
     }
 
-Another:
+More complex:
 
     class { 'ipaclient':
        user            => "admin",
@@ -47,15 +48,17 @@ Another:
        domain          => "pixiedust.com",
        realm           => "PIXEDUST.COM",
        mkhomedir       => false,
-       automount       => true
-       fixed_primary   => true,
+       automount       => true,
+       ssh             => false,
+       fixed_primary   => true
+       automount_location => "home",
     }
 
-Default and simple sudoers:
+Default and simple sudoers setup:
 
     class { 'ipaclient::sudoers': }
 
-Manual sudoers:
+Specific settings for sudoers:
 
     class { 'ipaclient::sudoers':
         server  => "_srv_, ipa01.pixiedust.com",
@@ -73,7 +76,7 @@ Known Issues
 ------------
 
 You must run puppet twice to get sudo working the first time, because it
-relies on facts that are available AFTER ipa-client-install is run.
+relies on facts that are available only AFTER ipa-client-install is run. 
 
 A workaround is to load them separately, and set the sudoer configuration
 manually:
