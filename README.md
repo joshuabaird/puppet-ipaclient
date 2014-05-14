@@ -54,42 +54,15 @@ More complex:
        automount_location => "home",
     }
 
-Default and simple sudoers setup:
+Simple sudoers setup:
 
     class { 'ipaclient::sudoers': }
-
-Specific settings for sudoers:
-
-    class { 'ipaclient::sudoers':
-        server  => "_srv_, ipa01.pixiedust.com",
-        domain  => "pixiedust.com",
-    }
 
 Automounter only:
 
     class { 'ipaclient::automount':
         location    => 'home',
         server      => 'ipa01.pixiedust.com',
-    }
-
-Known Issues
-------------
-
-You must run puppet twice to get sudo working the first time, because it
-relies on facts that are available only AFTER ipa-client-install is run. 
-
-A workaround is to load them separately, and set the sudoer configuration
-manually:
-
-    class { 'ipaclient':
-        sudo     => false,
-        password => 'password',
-    }
-
-    class { 'ipaclient::sudoers':
-        server    => "_srv_",
-        domain    => "pixiedust.com",
-        require   => Class['ipaclient'],
     }
 
 MIT License

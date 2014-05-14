@@ -25,18 +25,19 @@ class ipaclient::automount(
 ) inherits ipaclient::params {
 
   if !empty($server) {
-    $opt_server = ['--server',"${server}"]
-  } else { 
+    $opt_server = ['--server',$server]
+  } else {
     $opt_server = ''
   }
 
   if !empty($location) {
-    $opt_location = ['--location',"${location}"]
-  } else { 
+    $opt_location = ['--location',$location]
+  } else {
     $opt_location = ''
   }
 
-  $command = shellquote(delete(flatten(["/usr/sbin/ipa-client-automount",$opt_server,$opt_location,'--unattended']), ''))
+  $command = shellquote(delete(flatten(['/usr/sbin/ipa-client-automount',
+                        $opt_server,$opt_location,'--unattended']), ''))
 
   exec { 'enable_automount':
     command => $command,

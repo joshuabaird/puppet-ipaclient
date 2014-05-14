@@ -102,7 +102,7 @@ describe 'ipaclient::sudoers' do
     end
   end
 
-  context "Debian SSSD >= 1.11" do
+  context "Debian" do
     let :facts do {
       :ipa_domain    => 'pixiedust.com',
       :fqdn          => 'host.pixiedust.com',
@@ -128,6 +128,64 @@ describe 'ipaclient::sudoers' do
       should contain_file('/etc/init/nisdomain.conf').
         with_content(/\/bin\/nisdomainname pixiedust.com/).
         with_content(/start on runlevel \[2345\]/)
+    end
+  end
+
+  context "Ubuntu 14.04" do
+    let :facts do {
+      :ipa_domain             => 'pixiedust.com',
+      :fqdn                   => 'host.pixiedust.com',
+      :osfamily               => 'Debian',
+      :operatingsystem        => 'Ubuntu',
+      :operatingsystemrelease => '14.04'
+    } end
+
+    let(:params) do {
+      :server => "_srv_"
+    } end
+
+    it "should configure sssd" do
+      should contain_augeas('sssd')
+    end
+
+    describe_augeas 'sssd', :lens => 'Sssd', :target => 'etc/sssd/sssd.conf' do
+      it 'should configure sssd to use ipa sudo provider' do
+        should execute.with_change
+        aug_get("target[1]/sudo_provider").should == "ipa"
+        aug_get("target[2]/services").should == "nss, pam, ssh, sudo"
+        should execute.idempotently
+      end
+    end
+  end
+
+  context "Fedora 20" do
+    let :facts do {
+      :ipa_domain             => 'pixiedust.com',
+      :fqdn                   => 'host.pixiedust.com',
+      :osfamily               => 'RedHat',
+      :operatingsystem        => 'Fedora',
+      :operatingsystemrelease => '20'
+    } end
+
+    let(:params) do {
+      :server => "_srv_"
+    } end
+
+    it "should not install libsss sudo package" do
+      should_not contain_package("libsss_sudo")
+    end
+
+    it "should configure sssd" do
+      should contain_augeas('sssd')
+    end
+
+    describe_augeas 'sssd', :lens => 'Sssd', :target => 'etc/sssd/sssd.conf' do
+      it 'should configure sssd to use ipa sudo provider' do
+        should execute.with_change
+        aug_get("target[1]/sudo_provider").should == "ipa"
+        aug_get("target[2]/services").should == "nss, pam, ssh, sudo"
+        should execute.idempotently
+      end
     end
   end
 end
