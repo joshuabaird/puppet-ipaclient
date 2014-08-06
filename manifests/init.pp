@@ -163,6 +163,14 @@ class ipaclient (
       }
 
       $installer_resource = Exec['ipa_installer']
+
+      # Include debian fixes since the installer doesn't properly
+      # configure ssh and mkhomedir
+      if ($::osfamily == "Debian") {
+        class { 'ipaclient::debian_fixes':
+          require => $installer_resource,
+        }
+      }
     }
   }
 

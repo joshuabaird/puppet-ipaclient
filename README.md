@@ -42,7 +42,7 @@ Discovery register (w/ sane defaults: sudo, mkhomedir, ssh, etc):
 More complex:
 
     class { 'ipaclient':
-       user            => "admin",
+       principal       => "admin",
        password        => "unicorns",
        server          => ["ipa01.pixiedust.com", "ipa02.pixiedust.com"]
        domain          => "pixiedust.com",

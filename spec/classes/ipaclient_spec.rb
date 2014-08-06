@@ -137,4 +137,19 @@ describe 'ipaclient' do
       expect { subject }.to raise_error(/does not support/)
     end
   end
+
+  context 'Debian' do
+    let :facts do {
+      :osfamily  => 'Debian',
+    } end
+
+    let :params do {
+      :mkhomedir => 'true',
+      :password  => "unicorns",
+    } end
+
+    it 'should include debian_fixes' do
+      should contain_class('ipaclient::debian_fixes')
+    end
+  end
 end
