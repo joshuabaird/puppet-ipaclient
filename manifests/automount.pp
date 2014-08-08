@@ -41,6 +41,6 @@ class ipaclient::automount(
 
   exec { 'enable_automount':
     command => $command,
-    unless  => 'grep -qE "automount:\s+sss" /etc/nsswitch.conf',
+    unless  => '/bin/grep -qE "automount:\s+sss" /etc/nsswitch.conf',
   }
 }
