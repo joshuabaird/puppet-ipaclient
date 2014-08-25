@@ -158,7 +158,7 @@ class ipaclient (
 
       exec { 'ipa_installer':
         command => $command,
-        unless  => '/usr/sbin/ipa-client-install -U 2>&1 | grep -q "already configured"',
+        unless  => '/usr/sbin/ipa-client-install -U 2>&1 | /bin/grep -q "already configured"',
         require => Package[$package],
       }
 
