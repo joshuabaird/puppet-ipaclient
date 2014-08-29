@@ -7,7 +7,7 @@ describe 'ipaclient::sudoers' do
       :fqdn          => 'host.pixiedust.com',
       :sssd_version  => '1.9.2',
       :osfamily      => "RedHat",
-      :sssd_services => 'nss, pam, ssh'
+      :sssd_services => 'nss, pam, ssh, foo'
     } end
 
     describe "with srv record" do
@@ -39,7 +39,7 @@ describe 'ipaclient::sudoers' do
           aug_get("target[1]/ldap_sasl_authid").should == "host/host.pixiedust.com"
           aug_get("target[1]/ldap_sasl_realm").should == "PIXIEDUST.COM"
           aug_get("target[1]/krb5_server").should == "_srv_"
-          aug_get("target[2]/services").should == "nss, pam, ssh, sudo"
+          aug_get("target[2]/services").should == "nss, pam, ssh, foo, sudo"
           should execute.idempotently
         end
       end
@@ -73,7 +73,7 @@ describe 'ipaclient::sudoers' do
           aug_get("target[1]/ldap_sasl_authid").should == "host/host.pixiedust.com"
           aug_get("target[1]/ldap_sasl_realm").should == "PIXIEDUST.COM"
           aug_get("target[1]/krb5_server").should == "ipa01.pixiedust.com"
-          aug_get("target[2]/services").should == "nss, pam, ssh, sudo"
+          aug_get("target[2]/services").should == "nss, pam, ssh, foo, sudo"
           should execute.idempotently
         end
       end
@@ -87,7 +87,7 @@ describe 'ipaclient::sudoers' do
       :fqdn          => 'host.pixiedust.com',
       :sssd_version  => '1.11',
       :osfamily      => 'RedHat',
-      :sssd_services => 'nss, pam, ssh, sudo'
+      :sssd_services => 'nss, pam, ssh, foo, sudo'
     } end
 
     it "should configure sssd" do
@@ -98,7 +98,7 @@ describe 'ipaclient::sudoers' do
       it 'should configure sssd to use ipa sudo provider' do
         should execute.with_change
         aug_get("target[1]/sudo_provider").should == "ipa"
-        aug_get("target[2]/services").should == "nss, pam, ssh, sudo"
+        aug_get("target[2]/services").should == "nss, pam, ssh, foo, sudo"
         should execute.idempotently
       end
     end
@@ -140,7 +140,7 @@ describe 'ipaclient::sudoers' do
       :osfamily               => 'Debian',
       :operatingsystem        => 'Ubuntu',
       :operatingsystemrelease => '14.04',
-      :sssd_services          => 'nss, pam, ssh'
+      :sssd_services          => 'nss, pam, ssh, foo'
     } end
 
     let(:params) do {
@@ -155,7 +155,7 @@ describe 'ipaclient::sudoers' do
       it 'should configure sssd to use ipa sudo provider' do
         should execute.with_change
         aug_get("target[1]/sudo_provider").should == "ipa"
-        aug_get("target[2]/services").should == "nss, pam, ssh, sudo"
+        aug_get("target[2]/services").should == "nss, pam, ssh, foo, sudo"
         should execute.idempotently
       end
     end
@@ -168,7 +168,7 @@ describe 'ipaclient::sudoers' do
       :osfamily               => 'RedHat',
       :operatingsystem        => 'Fedora',
       :operatingsystemrelease => '20',
-      :sssd_services          => 'nss, pam, ssh'
+      :sssd_services          => 'nss, pam, ssh, foo'
     } end
 
     let(:params) do {
@@ -187,7 +187,7 @@ describe 'ipaclient::sudoers' do
       it 'should configure sssd to use ipa sudo provider' do
         should execute.with_change
         aug_get("target[1]/sudo_provider").should == "ipa"
-        aug_get("target[2]/services").should == "nss, pam, ssh, sudo"
+        aug_get("target[2]/services").should == "nss, pam, ssh, foo, sudo"
         should execute.idempotently
       end
     end

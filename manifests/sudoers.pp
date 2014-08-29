@@ -119,12 +119,12 @@ class ipaclient::sudoers (
       }
     }    
 
-    if ($ipa_provider == 'ipa') {
+    $enable_sssd_services = $::sssd_services ? {
+      /sudo/  => $::sssd_services,
+      default => "$::sssd_services, sudo"
+    }
 
-      $enable_sssd_services = $::sssd_services ? {
-        /sudo/  => $::sssd_services,
-        default => "$::sssd_services, sudo"
-      }
+    if ($ipa_provider == 'ipa') {
 
       # SSSD versions >= 1.11 support using the IPA sudo_provider
       # which is vastly simpler to configure
@@ -165,7 +165,7 @@ class ipaclient::sudoers (
           "set target[1]/ldap_sasl_authid host/${::fqdn}",
           "set target[1]/ldap_sasl_realm ${realm}",
           "set target[1]/krb5_server ${krb5_server}",
-          'set target[2]/services "nss, pam, ssh, sudo"',
+          "set target[2]/services \"$enable_sssd_services\"",
         ],
         notify  => Service['sssd'],
       }
