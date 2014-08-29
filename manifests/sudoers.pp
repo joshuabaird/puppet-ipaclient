@@ -120,13 +120,19 @@ class ipaclient::sudoers (
     }    
 
     if ($ipa_provider == 'ipa') {
+
+      $enable_sssd_services = $::sssd_services ? {
+        /sudo/  => $::sssd_services,
+        default => "$::sssd_services, sudo"
+      }
+
       # SSSD versions >= 1.11 support using the IPA sudo_provider
       # which is vastly simpler to configure
       augeas { 'sssd':
         context => '/files/etc/sssd/sssd.conf',
         changes => [
           'set target[1]/sudo_provider ipa',
-          'set target[2]/services "nss, pam, ssh, sudo"',
+          "set target[2]/services \"$enable_sssd_services\"",
         ],
         notify  => Service['sssd'],
       }

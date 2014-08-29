@@ -6,7 +6,8 @@ describe 'ipaclient::sudoers' do
       :ipa_domain    => 'pixiedust.com',
       :fqdn          => 'host.pixiedust.com',
       :sssd_version  => '1.9.2',
-      :osfamily      => "RedHat"
+      :osfamily      => "RedHat",
+      :sssd_services => 'nss, pam, ssh'
     } end
 
     describe "with srv record" do
@@ -86,6 +87,7 @@ describe 'ipaclient::sudoers' do
       :fqdn          => 'host.pixiedust.com',
       :sssd_version  => '1.11',
       :osfamily      => 'RedHat',
+      :sssd_services => 'nss, pam, ssh, sudo'
     } end
 
     it "should configure sssd" do
@@ -137,7 +139,8 @@ describe 'ipaclient::sudoers' do
       :fqdn                   => 'host.pixiedust.com',
       :osfamily               => 'Debian',
       :operatingsystem        => 'Ubuntu',
-      :operatingsystemrelease => '14.04'
+      :operatingsystemrelease => '14.04',
+      :sssd_services          => 'nss, pam, ssh'
     } end
 
     let(:params) do {
@@ -164,7 +167,8 @@ describe 'ipaclient::sudoers' do
       :fqdn                   => 'host.pixiedust.com',
       :osfamily               => 'RedHat',
       :operatingsystem        => 'Fedora',
-      :operatingsystemrelease => '20'
+      :operatingsystemrelease => '20',
+      :sssd_services          => 'nss, pam, ssh'
     } end
 
     let(:params) do {
