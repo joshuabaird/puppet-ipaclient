@@ -161,6 +161,25 @@ describe 'ipaclient::sudoers' do
     end
   end
 
+  context "Any EL 7" do
+    let :facts do {
+      :ipa_domain             => 'pixiedust.com',
+      :fqdn                   => 'host.pixiedust.com',
+      :osfamily               => 'RedHat',
+      :operatingsystem        => 'Scientific Linux',
+      :operatingsystemrelease => '7.1',
+      :sssd_services          => 'nss, pam, ssh, foo'
+    } end
+
+    let(:params) do {
+      :server => "_srv_"
+    } end
+
+    it "should not install libsss sudo package" do
+      should_not contain_package("libsss_sudo")
+    end
+  end
+
   context "Fedora 20" do
     let :facts do {
       :ipa_domain             => 'pixiedust.com',
