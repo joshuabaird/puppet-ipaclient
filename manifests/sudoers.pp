@@ -38,7 +38,11 @@ class ipaclient::sudoers (
         if ($::operatingsystem == "Fedora" and versioncmp($::operatingsystemrelease, '20') >= 0) {
             # not needed on F20+
             $libsss_sudo_package = []
-        } else {
+        }
+        elseif ($::operatingsystem == "RedHat" and versioncmp($::operatingsystemrelease, '7.0') {
+            $libsss_sudo_package = []
+        }
+        else {
             $libsss_sudo_package = 'libsss_sudo'
         }
 
@@ -94,7 +98,7 @@ class ipaclient::sudoers (
     if empty($::sssd_version) {
       case $::osfamily {
         RedHat: { 
-          if (versioncmp($::operatingsystemrelease, '6.6') >= 0) {
+          if (versioncmp($::operatingsystemrelease, '6.6') >= 0 or versioncmp($::operatingsystemrelease, '7.0') >= 0 ) {
             $ipa_provider = 'ipa'
           } else {
             $ipa_provider = 'ldap'
