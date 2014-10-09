@@ -120,9 +120,21 @@ class ipaclient::sudoers (
       }
     }
 
-    $enable_sssd_services = $::sssd_services ? {
-      /sudo/  => $::sssd_services,
-      default => "$::sssd_services, sudo"
+    if ($::ipaclient::automount) {
+      $sssd_with_automount = $::sssd_services ? {
+        /autofs/ => $::sssd_services,
+        default  => "$::sssd_services, autofs"
+      }
+
+      $enable_sssd_services = $::sssd_services ? {
+        /sudo/  => $sssd_with_automount,
+        default => "$sssd_with_automount, sudo"
+      }
+    } else {
+      $enable_sssd_services = $::sssd_services ? {
+        /sudo/  => $::sssd_services,
+        default => "$::sssd_services, sudo"
+      }
     }
 
     if ($ipa_provider == 'ipa') {

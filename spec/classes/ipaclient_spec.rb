@@ -26,7 +26,7 @@ describe 'ipaclient' do
       it "should have the right package name"  do
         should contain_package('freeipa-client')
       end
-  
+
       it "should generate the right command" do
         should contain_exec('ipa_installer').
           with_command("/usr/sbin/ipa-client-install --password unicorns --mkhomedir --force --unattended")
@@ -79,7 +79,8 @@ describe 'ipaclient' do
   context 'RedHat' do
     let :facts do {
       :osfamily        => 'RedHat',
-      :operatingsystem => 'RedHat'
+      :operatingsystem => 'RedHat',
+      :sssd_services   => 'nss, pam, ssh'
     } end
 
     describe "full manual register" do
@@ -105,8 +106,34 @@ describe 'ipaclient' do
         should contain_exec('ipa_installer').with_command("/usr/sbin/ipa-client-install --realm PIXIEDUST.COM --password unicorns --principal rainbows@PIXIEDUST.COM --domain pixiedust.com --server ipa01.pixiedust.com --force --unattended")
       end
 
-      it "should configure sudoers" do
+      it "should not configure sudoers" do
         should_not contain_class('ipaclient::sudoers')
+      end
+    end
+
+    describe "with automount and sudoers" do
+      let :params do {
+          :mkhomedir => 'false',
+          :password  => "unicorns",
+          :principal => "rainbows",
+          :server    => "ipa01.pixiedust.com",
+          :domain    => "pixiedust.com",
+          :realm     => "PIXIEDUST.COM",
+          :sudo      => true,
+          :automount => true,
+          :automount_location => 'home'
+      } end
+
+      it "should configure sssd" do
+        should contain_augeas('sssd')
+      end
+
+      describe_augeas 'sssd', :lens => 'Sssd', :target => 'etc/sssd/sssd.conf' do
+        it 'should configure sssd to use ipa sudo provider with autofs' do
+          should execute.with_change
+          aug_get("target[2]/services").should == "nss, pam, ssh, autofs, sudo"
+          should execute.idempotently
+        end
       end
     end
   end

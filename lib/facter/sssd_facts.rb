@@ -9,9 +9,13 @@ end
 
 Facter.add(:sssd_services) do
   setcode do
-    Augeas::open do |aug|
-      aug.load
-      aug.get("/files/etc/sssd/sssd.conf/target[.='sssd']/services")
+    if File.exist? '/etc/sssd/sssd.conf'
+      Augeas::open do |aug|
+        aug.load
+        aug.get("/files/etc/sssd/sssd.conf/target[.='sssd']/services")
+      end
+    else
+      'nss, pam, ssh'
     end
   end
 end
