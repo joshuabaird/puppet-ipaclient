@@ -1,5 +1,5 @@
 name 'stbenjam-ipaclient'
-version '2.3.2'
+version '2.4.0'
 author 'stbenjam'
 license 'MIT'
 summary 'Manages server IPA Registration'
