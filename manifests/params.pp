@@ -1,3 +1,7 @@
+# == Class: ipaclient::params
+#
+# Default parameters for the ipaclient module
+#
 class ipaclient::params {
 
   $server         = ''
@@ -32,7 +36,7 @@ class ipaclient::params {
         $package = 'freeipa-client'
     }
     default: {
-      fail("${::hostname}: This module does not support operatingsystem ${::operatingsystem}")
+      fail("This module does not support operatingsystem ${::operatingsystem}")
     }
   }
 }
