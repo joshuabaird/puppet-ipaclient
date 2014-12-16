@@ -39,7 +39,7 @@ class ipaclient::sudoers (
           versioncmp($::operatingsystemrelease, '20') >= 0) {
             $libsss_sudo_package = []
         } elsif ($::operatingsystem != 'Fedora' and
-            versioncmp($::operatingsystemrelease, '7') >= 0) {
+            versioncmp($::operatingsystemrelease, '6.6') >= 0) {
             $libsss_sudo_package = []
         } else {
             $libsss_sudo_package = 'libsss_sudo'
