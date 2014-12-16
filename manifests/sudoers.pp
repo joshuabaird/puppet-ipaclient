@@ -35,9 +35,11 @@ class ipaclient::sudoers (
     case $::osfamily {
       RedHat: {
 
-        if ($::operatingsystem == "Fedora" and versioncmp($::operatingsystemrelease, '20') >= 0) {
+        if ($::operatingsystem == 'Fedora' and
+          versioncmp($::operatingsystemrelease, '20') >= 0) {
             $libsss_sudo_package = []
-        } elsif ($::operatingsystem != "Fedora" and versioncmp($::operatingsystemrelease, '7') >= 0) {
+        } elsif ($::operatingsystem != 'Fedora' and
+            versioncmp($::operatingsystemrelease, '7') >= 0) {
             $libsss_sudo_package = []
         } else {
             $libsss_sudo_package = 'libsss_sudo'
@@ -102,7 +104,8 @@ class ipaclient::sudoers (
           }
         }
         Debian: {
-          if (versioncmp($::operatingsystemrelease, '14.04') >= 0 and $::operatingsystem == 'Ubuntu') {
+          if (versioncmp($::operatingsystemrelease, '14.04') >= 0 and
+            $::operatingsystem == 'Ubuntu') {
             $ipa_provider = 'ipa'
           } else {
             $ipa_provider = 'ldap'
@@ -123,17 +126,17 @@ class ipaclient::sudoers (
     if ($::ipaclient::automount) {
       $sssd_with_automount = $::sssd_services ? {
         /autofs/ => $::sssd_services,
-        default  => "$::sssd_services, autofs"
+        default  => "${::sssd_services}, autofs"
       }
 
       $enable_sssd_services = $::sssd_services ? {
         /sudo/  => $sssd_with_automount,
-        default => "$sssd_with_automount, sudo"
+        default => "${sssd_with_automount}, sudo"
       }
     } else {
       $enable_sssd_services = $::sssd_services ? {
         /sudo/  => $::sssd_services,
-        default => "$::sssd_services, sudo"
+        default => "${::sssd_services}, sudo"
       }
     }
 
@@ -145,7 +148,7 @@ class ipaclient::sudoers (
         context => '/files/etc/sssd/sssd.conf',
         changes => [
           'set target[1]/sudo_provider ipa',
-          "set target[2]/services \"$enable_sssd_services\"",
+          "set target[2]/services \"${enable_sssd_services}\"",
         ],
         notify  => Service['sssd'],
       }
@@ -178,7 +181,7 @@ class ipaclient::sudoers (
           "set target[1]/ldap_sasl_authid host/${::fqdn}",
           "set target[1]/ldap_sasl_realm ${realm}",
           "set target[1]/krb5_server ${krb5_server}",
-          "set target[2]/services \"$enable_sssd_services\"",
+          "set target[2]/services \"${enable_sssd_services}\"",
         ],
         notify  => Service['sssd'],
       }

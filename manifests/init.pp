@@ -94,7 +94,7 @@ class ipaclient (
 ) inherits ipaclient::params {
 
   package { $package:
-    ensure      => installed,
+    ensure => installed,
   }
 
   if !str2bool($::ipa_enrolled) {
@@ -158,7 +158,8 @@ class ipaclient (
 
       exec { 'ipa_installer':
         command => $command,
-        unless  => '/usr/sbin/ipa-client-install -U 2>&1 | /bin/grep -q "already configured"',
+        unless  => "/usr/sbin/ipa-client-install -U 2>&1 \
+          | /bin/grep -q 'already configured'",
         require => Package[$package],
       }
 
@@ -166,7 +167,7 @@ class ipaclient (
 
       # Include debian fixes since the installer doesn't properly
       # configure ssh and mkhomedir
-      if ($::osfamily == "Debian") {
+      if ($::osfamily == 'Debian') {
         class { 'ipaclient::debian_fixes':
           require => $installer_resource,
         }
