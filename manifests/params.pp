@@ -21,6 +21,7 @@ class ipaclient::params {
   $automount_location = ''
   $automount_server   = ''
   $ntp            = true
+  $force          = false
 
   # Name of IPA package to install
   case $::osfamily {
