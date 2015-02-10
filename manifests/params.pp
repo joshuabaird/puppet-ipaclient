@@ -19,6 +19,7 @@ class ipaclient::params {
   $installer      = '/usr/sbin/ipa-client-install'
   $automount_location = ''
   $automount_server   = ''
+  $ntp            = true
 
   # Name of IPA package to install
   case $::osfamily {
