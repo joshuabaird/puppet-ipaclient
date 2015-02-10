@@ -29,7 +29,7 @@ describe 'ipaclient' do
 
       it "should generate the right command" do
         should contain_exec('ipa_installer').
-          with_command("/usr/sbin/ipa-client-install --password unicorns --mkhomedir --force --unattended")
+          with_command("/usr/sbin/ipa-client-install --password unicorns --mkhomedir --unattended")
       end
 
       it "should configure sudo" do
@@ -45,7 +45,7 @@ describe 'ipaclient' do
 
       it "should generate the right command" do
         should contain_exec('ipa_installer').
-          with_command("/usr/sbin/ipa-client-install --password unicorns --mkhomedir --permit --force --unattended")
+          with_command("/usr/sbin/ipa-client-install --password unicorns --mkhomedir --permit --unattended")
       end
     end
 
@@ -58,7 +58,7 @@ describe 'ipaclient' do
 
       it "should generate the right command" do
         should contain_exec('ipa_installer').
-          with_command('/usr/sbin/ipa-client-install --password unicorns --mkhomedir --server ipa01.example.com --server ipa02.example.com --force --unattended')
+          with_command('/usr/sbin/ipa-client-install --password unicorns --mkhomedir --server ipa01.example.com --server ipa02.example.com --unattended')
       end
     end
 
@@ -71,7 +71,7 @@ describe 'ipaclient' do
 
       it "should generate the right command" do
         should contain_exec('ipa_installer').
-          with_command("/usr/sbin/ipa-client-install --password unicorns --mkhomedir --server ipa01.example.com --force --unattended")
+          with_command("/usr/sbin/ipa-client-install --password unicorns --mkhomedir --server ipa01.example.com --unattended")
       end
     end
   end
@@ -95,7 +95,8 @@ describe 'ipaclient' do
         :automount => true,
         :automount_location => 'home',
         :ntp => false,
-        :sshd => false
+        :sshd => false,
+        :force => true 
       } end
 
       it "should install the right package" do

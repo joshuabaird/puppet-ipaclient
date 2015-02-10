@@ -21,6 +21,9 @@
 # $fixed_primary::         Used a fixed primary
 #                          Default: false
 #
+# $force::                 Enable "forced" installation mode
+#                          Default: false
+#
 # $installer::             IPA install command
 #
 # $mkhomedir::             Automatically make /home/<user> or not
@@ -87,6 +90,7 @@ class ipaclient (
   $automount_server   = $ipaclient::params::automount_server,
   $domain             = $ipaclient::params::domain,
   $fixed_primary      = $ipaclient::params::fixed_primary,
+  $force              = $ipaclient::params::force,
   $installer          = $ipaclient::params::installer,
   $mkhomedir          = $ipaclient::params::mkhomedir,
   $ntp                = $ipaclient::params::ntp,
@@ -170,11 +174,17 @@ class ipaclient (
         $opt_ntp = ''
       }
 
+      if str2bool($force) {
+        $opt_force = '--force'
+      } else {
+        $opt_force = ''
+      }
+
       # Flatten the arrays, delete empty options, and shellquote everything
       $command = shellquote(delete(flatten([$installer,$opt_realm,$opt_password,
                             $opt_principal,$opt_mkhomedir,$opt_domain,
-                            $opt_server,$opt_fixed_primary,$opt_ssh,$opt_sshd,$opt_ntp,$options,
-                            '--force','--unattended']), ''))
+                            $opt_server,$opt_fixed_primary,$opt_ssh,$opt_sshd,$opt_ntp,$opt_force,$options,
+                            '--unattended']), ''))
 
       exec { 'ipa_installer':
         command => $command,
