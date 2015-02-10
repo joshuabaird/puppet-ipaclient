@@ -26,6 +26,9 @@
 # $mkhomedir::             Automatically make /home/<user> or not
 #                          Default: true
 #
+# $ntp::                   Manage and configure ntpd?
+#                          Default: true
+#
 # $options::               Additional command-line options to pass directly to
 #                          installer
 #
@@ -83,6 +86,7 @@ class ipaclient (
   $fixed_primary      = $ipaclient::params::fixed_primary,
   $installer          = $ipaclient::params::installer,
   $mkhomedir          = $ipaclient::params::mkhomedir,
+  $ntp                = $ipaclient::params::ntp,
   $options            = $ipaclient::params::options,
   $package            = $ipaclient::params::package,
   $password           = $ipaclient::params::password,
@@ -150,10 +154,16 @@ class ipaclient (
         $opt_mkhomedir = ''
       }
 
+      if !str2bool($ntp) {
+        $opt_ntp = '--no-ntp'
+      } else {
+        $opt_ntp = ''
+      }
+
       # Flatten the arrays, delete empty options, and shellquote everything
       $command = shellquote(delete(flatten([$installer,$opt_realm,$opt_password,
                             $opt_principal,$opt_mkhomedir,$opt_domain,
-                            $opt_server,$opt_fixed_primary,$opt_ssh,$options,
+                            $opt_server,$opt_fixed_primary,$opt_ssh,$opt_ntp,$options,
                             '--force','--unattended']), ''))
 
       exec { 'ipa_installer':
