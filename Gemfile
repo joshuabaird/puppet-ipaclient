@@ -7,3 +7,4 @@ gem 'rspec-puppet', '< 1.0.0'
 gem 'ruby-augeas'
 gem 'puppet-lint', '>= 1'
 gem 'puppet-blacksmith', '>= 3.1.0', {"groups"=>["development"]}
+gem 'rspec', '~> 3.1.0'

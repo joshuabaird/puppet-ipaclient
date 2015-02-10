@@ -154,10 +154,10 @@ class ipaclient (
         $opt_mkhomedir = ''
       }
 
-      if str2bool($ntp) {
-        $opt_ntp == '--no-ntp'
+      if !str2bool($ntp) {
+        $opt_ntp = '--no-ntp'
       } else {
-        $opt_ntp == ''
+        $opt_ntp = ''
       }
 
       # Flatten the arrays, delete empty options, and shellquote everything
