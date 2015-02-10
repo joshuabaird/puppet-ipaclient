@@ -45,6 +45,9 @@
 # $ssh::                   Enable SSH Integation
 #                          Default: true
 #
+# $sshd::                  Enable SSHD Integration
+#                          Default: true
+#
 # $sudo::                  Enable sudoers management
 #                          Default: true
 #
@@ -94,6 +97,7 @@ class ipaclient (
   $realm              = $ipaclient::params::realm,
   $server             = $ipaclient::params::server,
   $ssh                = $ipaclient::params::ssh,
+  $sshd               = $ipaclient::params::sshd,
   $sudo               = $ipaclient::params::sudo
 ) inherits ipaclient::params {
 
@@ -142,6 +146,12 @@ class ipaclient (
         $opt_ssh = ''
       }
 
+      if !str2bool($sshd) {
+        $opt_sshd = '--no-sshd'
+      } else {
+        $opt_sshd = ''
+      }
+
       if str2bool($fixed_primary) {
         $opt_fixed_primary = '--fixed-primary'
       } else {
@@ -163,7 +173,7 @@ class ipaclient (
       # Flatten the arrays, delete empty options, and shellquote everything
       $command = shellquote(delete(flatten([$installer,$opt_realm,$opt_password,
                             $opt_principal,$opt_mkhomedir,$opt_domain,
-                            $opt_server,$opt_fixed_primary,$opt_ssh,$opt_ntp,$options,
+                            $opt_server,$opt_fixed_primary,$opt_ssh,$opt_sshd,$opt_ntp,$options,
                             '--force','--unattended']), ''))
 
       exec { 'ipa_installer':

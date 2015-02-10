@@ -11,6 +11,7 @@ class ipaclient::params {
   $password       = ''
   $ntp_server     = ''
   $ssh            = true
+  $sshd           = true
   $automount      = false
   $mkhomedir      = true
   $sudo           = true

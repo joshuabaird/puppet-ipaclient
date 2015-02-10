@@ -94,7 +94,8 @@ describe 'ipaclient' do
         :sudo      => false,
         :automount => true,
         :automount_location => 'home',
-        :ntp => false
+        :ntp => false,
+        :sshd => false
       } end
 
       it "should install the right package" do
@@ -104,7 +105,7 @@ describe 'ipaclient' do
       end
 
       it "should generate the correct command" do
-        should contain_exec('ipa_installer').with_command("/usr/sbin/ipa-client-install --realm PIXIEDUST.COM --password unicorns --principal rainbows@PIXIEDUST.COM --domain pixiedust.com --server ipa01.pixiedust.com --no-ntp --force --unattended")
+        should contain_exec('ipa_installer').with_command("/usr/sbin/ipa-client-install --realm PIXIEDUST.COM --password unicorns --principal rainbows@PIXIEDUST.COM --domain pixiedust.com --server ipa01.pixiedust.com --no-sshd --no-ntp --force --unattended")
       end
 
       it "should not configure sudoers" do
