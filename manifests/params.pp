@@ -23,6 +23,45 @@ class ipaclient::params {
   $ntp            = true
   $force          = false
 
+  # Version of IPA client
+  case $::osfamily {
+    RedHat: {
+      case $::operatingsystem {
+        'Fedora': {
+          if (versioncmp($::operatingsystemrelease, '21') >= 0) {
+            $version = '4'
+          } else {
+            $version = '3'
+          }
+        }
+        default: {
+          if (versioncmp($::operatingsystemrelease, '7.1') >= 0) {
+            $version = '4'
+          } else {
+            $version = '3'
+          }
+        }
+      }
+    }
+    Debian: {
+      case $::operatingsystem {
+        'Ubuntu': {
+          if (versioncmp($::operatingsystemrelease, '15.04') > 0) {
+            $version = '4'
+          } else {
+            $version = '3'
+          }
+        }
+        default: {
+          $version = '3'
+        }
+      }
+    }
+    default: {
+      fail("This module does not support operatingsystem ${::operatingsystem}")
+    }
+  }
+
   # Name of IPA package to install
   case $::osfamily {
     RedHat: {

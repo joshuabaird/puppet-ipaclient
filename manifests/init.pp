@@ -54,6 +54,7 @@
 # $sudo::                  Enable sudoers management
 #                          Default: true
 #
+# $version::               IPA client version
 #
 # === Examples
 #
@@ -102,7 +103,8 @@ class ipaclient (
   $server             = $ipaclient::params::server,
   $ssh                = $ipaclient::params::ssh,
   $sshd               = $ipaclient::params::sshd,
-  $sudo               = $ipaclient::params::sudo
+  $sudo               = $ipaclient::params::sudo,
+  $version            = $ipaclient::params::version
 ) inherits ipaclient::params {
 
   package { $package:
@@ -180,11 +182,17 @@ class ipaclient (
         $opt_force = ''
       }
 
+      if !str2bool($sudo) {
+        $opt_sudo = '--no-sudo'
+      } else {
+        $opt_sudo = ''
+      }
+
       # Flatten the arrays, delete empty options, and shellquote everything
       $command = shellquote(delete(flatten([$installer,$opt_realm,$opt_password,
                             $opt_principal,$opt_mkhomedir,$opt_domain,
-                            $opt_server,$opt_fixed_primary,$opt_ssh,$opt_sshd,$opt_ntp,$opt_force,$options,
-                            '--unattended']), ''))
+                            $opt_server,$opt_fixed_primary,$opt_ssh,$opt_sshd,$opt_ntp,$opt_sudo,
+                            $opt_force,$options,'--unattended']), ''))
 
       exec { 'ipa_installer':
         command => $command,
@@ -205,7 +213,9 @@ class ipaclient (
     }
   }
 
-  if str2bool($sudo) {
+  # ipa-client =>4 handles sudo configuration automatically,
+  # so we can skip the stuff below
+  if (str2bool($sudo) and $version < 4) {
     # If user didn't specify a server, use the fact.  Otherwise pass in
     # the first value of server parameter
     if empty($server) {
