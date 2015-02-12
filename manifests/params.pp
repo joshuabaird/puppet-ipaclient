@@ -23,22 +23,23 @@ class ipaclient::params {
   $ntp            = true
   $force          = false
 
-  # Version of IPA client
+  # Determine if client needs manual sudo configuration or not
+  # RHEL =>6.6 sudo configuration is automatic 
   case $::osfamily {
     RedHat: {
       case $::operatingsystem {
         'Fedora': {
           if (versioncmp($::operatingsystemrelease, '21') >= 0) {
-            $version = '4'
+            $needs_sudo_config = '0'
           } else {
-            $version = '3'
+            $needs_sudo_config = '1'
           }
         }
         default: {
-          if (versioncmp($::operatingsystemrelease, '7.1') >= 0) {
-            $version = '4'
+          if (versioncmp($::operatingsystemrelease, '6.6') >= 0) {
+            $needs_sudo_config = '0'
           } else {
-            $version = '3'
+            $needs_sudo_config = '1'
           }
         }
       }
@@ -47,13 +48,13 @@ class ipaclient::params {
       case $::operatingsystem {
         'Ubuntu': {
           if (versioncmp($::operatingsystemrelease, '15.04') > 0) {
-            $version = '4'
+            $needs_sudo_config = '0'
           } else {
-            $version = '3'
+            $needs_sudo_config = '1'
           }
         }
         default: {
-          $version = '3'
+          $needs_sudo_config = '1'
         }
       }
     }

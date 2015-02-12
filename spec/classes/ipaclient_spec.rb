@@ -124,7 +124,7 @@ describe 'ipaclient' do
           :automount => true,
           :automount_location => 'home',
           :sudo      => true,
-          :version   => '4'
+          :needs_sudo_config   => '0'
       } end
 
       it "should not configure sudo" do

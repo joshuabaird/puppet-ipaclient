@@ -29,6 +29,8 @@
 # $mkhomedir::             Automatically make /home/<user> or not
 #                          Default: true
 #
+# $needs_sudo_config       Manually configure sudo? (Boolean)
+#
 # $ntp::                   Manage and configure ntpd?
 #                          Default: true
 #
@@ -53,8 +55,6 @@
 #
 # $sudo::                  Enable sudoers management
 #                          Default: true
-#
-# $version::               IPA client version
 #
 # === Examples
 #
@@ -94,6 +94,7 @@ class ipaclient (
   $force              = $ipaclient::params::force,
   $installer          = $ipaclient::params::installer,
   $mkhomedir          = $ipaclient::params::mkhomedir,
+  $needs_sudo_config  = $ipaclient::params::needs_sudo_config,
   $ntp                = $ipaclient::params::ntp,
   $options            = $ipaclient::params::options,
   $package            = $ipaclient::params::package,
@@ -104,7 +105,6 @@ class ipaclient (
   $ssh                = $ipaclient::params::ssh,
   $sshd               = $ipaclient::params::sshd,
   $sudo               = $ipaclient::params::sudo,
-  $version            = $ipaclient::params::version
 ) inherits ipaclient::params {
 
   package { $package:
@@ -213,9 +213,7 @@ class ipaclient (
     }
   }
 
-  # ipa-client =>4 handles sudo configuration automatically,
-  # so we can skip the stuff below
-  if (str2bool($sudo) and $version < 4) {
+  if (str2bool($sudo) and str2bool($needs_sudo_config)) {
     # If user didn't specify a server, use the fact.  Otherwise pass in
     # the first value of server parameter
     if empty($server) {
