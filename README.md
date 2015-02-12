@@ -5,27 +5,26 @@ IPAclient
 
 This module configures clients to use FreeIPA with as little fuss as possible.
 
-Feedback and pull requests are very welcome.
+Thanks to all the [contributors](https://github.com/stbenjam/puppet-ipaclient/graphs/contributors)!
 
 What's New
 ----------
 
-(Experimental) Ubuntu support!
+FreeIPA 4 Support
 
-Refactored parameters to have better names, version
-2.0 isn't compatible with previous versions of the
-module.
+Contributing
+------------
+
+Feedback and pull requests are very welcome.  New functionality should have tests.
 
 Supported Platforms
 -------------------
 
-Tested on:
-  * RHEL and CentOS 6
-  * Fedora 20
-  * Ubuntu 14.04
+  * Enterprise Linux 6, 7 (RHEL, CentOS, etc)
+  * Fedora 20 or newer
+  * Ubuntu 14.04 or newer
 
-It should hopefully work on any recent Red Hat or Debian
-distro with IPA packages.  
+Basically, any Red Hat or Debian derivative with packages.
 
 Examples
 --------
@@ -54,7 +53,7 @@ More complex:
        automount_location => "home",
     }
 
-Simple sudoers setup:
+Simple sudoers setup (only needed for older FreeIPA 3.x clients):
 
     class { 'ipaclient::sudoers': }
 
