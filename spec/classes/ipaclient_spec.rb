@@ -106,10 +106,28 @@ describe 'ipaclient' do
       end
 
       it "should generate the correct command" do
-        should contain_exec('ipa_installer').with_command("/usr/sbin/ipa-client-install --realm PIXIEDUST.COM --password unicorns --principal rainbows@PIXIEDUST.COM --domain pixiedust.com --server ipa01.pixiedust.com --no-sshd --no-ntp --force --unattended")
+        should contain_exec('ipa_installer').with_command("/usr/sbin/ipa-client-install --realm PIXIEDUST.COM --password unicorns --principal rainbows@PIXIEDUST.COM --domain pixiedust.com --server ipa01.pixiedust.com --no-sshd --no-ntp --no-sudo --force --unattended")
       end
 
       it "should not configure sudoers" do
+        should_not contain_class('ipaclient::sudoers')
+      end
+    end
+
+    describe "with automount and sudoers for ipa-client 4" do
+      let :params do {
+          :password  => 'unicorns',
+          :principal => 'rainbows',
+          :server    => 'ipa01.pixiedust.com',
+          :domain    => 'pixiedust.com',
+          :realm     => 'PIXIEDUST.COM',
+          :automount => true,
+          :automount_location => 'home',
+          :sudo      => true,
+          :needs_sudo_config   => '0'
+      } end
+
+      it "should not configure sudo" do
         should_not contain_class('ipaclient::sudoers')
       end
     end
