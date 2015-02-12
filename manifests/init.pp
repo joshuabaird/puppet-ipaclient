@@ -9,52 +9,63 @@
 #
 # All Parameters:
 #
-# $automount::             Enable automount
-#                          Default: false
+# $automount::                    Enable automount
+#                                 Default: false
 #
-# $automount_location::    Automounter location
+# $automount_location::           Automounter location
 #
-# $automount_server::      Automounter server
+# $automount_server::             Automounter server
 #
-# $domain::                Domain, e.g. pixiedust.com
+# $domain::                       Domain, e.g. pixiedust.com
 #
-# $fixed_primary::         Used a fixed primary
-#                          Default: false
+# $fixed_primary::                Used a fixed primary
+#                                 Default: false
 #
-# $force::                 Enable "forced" installation mode
-#                          Default: false
+# $force::                        Enable "forced" installation mode
+#                                 Default: false
 #
-# $installer::             IPA install command
+# $installer::                    IPA install command
 #
-# $mkhomedir::             Automatically make /home/<user> or not
-#                          Default: true
+# $mkhomedir::                    Automatically make /home/<user> or not
+#                                 Default: true
 #
-# $needs_sudo_config       Manually configure sudo? (Boolean)
+# $needs_sudo_config              Manually configure sudo? (Boolean)
 #
-# $ntp::                   Manage and configure ntpd?
-#                          Default: true
+# $ntp::                          Manage and configure ntpd?
+#                                 Default: true
 #
-# $options::               Additional command-line options to pass directly to
-#                          installer
+# $options::                      Additional command-line options to pass directly to
+#                                 installer
 #
-# $package::               Package to install
+# $package::                      Package to install
 #
-# $password::              One-time password, or registration user's password
+# $password::                     One-time password, or registration user's password
 #
-# $principal::             Kerberos principal when not using one-time passwords
+# $principal::                    Kerberos principal when not using one-time passwords
 #
-# $realm::                 Realm, e.g. PIXIEDUST.COM
+# $realm::                        Realm, e.g. PIXIEDUST.COM
 #
-# $server::                Can be array or string of IPA servers
+# $server::                       Can be array or string of IPA servers
 #
-# $ssh::                   Enable SSH Integation
-#                          Default: true
+# $ssh::                          Enable SSH Integation
+#                                 Default: true
 #
-# $sshd::                  Enable SSHD Integration
-#                          Default: true
+# $sshd::                         Enable SSHD Integration
+#                                 Default: true
 #
-# $sudo::                  Enable sudoers management
-#                          Default: true
+# $sssd_sudo_cache_timeout        How many seconds should sudo consider rules valid before
+#                                 asking the backend again
+#
+# $sssd_sudo_full_refresh         How many seconds sssd will wait before executing
+#                                 a full refresh of sudo rules
+#
+# $sssd_sudo_smart_refresh        How many seconds sssd will wait before executing
+#                                 a smart refresh of sudo rules
+#
+# $sssd_default_domain_suffix     The default domain suffix for sssd
+#
+# $sudo::                         Enable sudoers management
+#                                 Default: true
 #
 # === Examples
 #
@@ -86,25 +97,29 @@
 # Released under the MIT License. See LICENSE for more information
 #
 class ipaclient (
-  $automount          = $ipaclient::params::automount,
-  $automount_location = $ipaclient::params::automount_location,
-  $automount_server   = $ipaclient::params::automount_server,
-  $domain             = $ipaclient::params::domain,
-  $fixed_primary      = $ipaclient::params::fixed_primary,
-  $force              = $ipaclient::params::force,
-  $installer          = $ipaclient::params::installer,
-  $mkhomedir          = $ipaclient::params::mkhomedir,
-  $needs_sudo_config  = $ipaclient::params::needs_sudo_config,
-  $ntp                = $ipaclient::params::ntp,
-  $options            = $ipaclient::params::options,
-  $package            = $ipaclient::params::package,
-  $password           = $ipaclient::params::password,
-  $principal          = $ipaclient::params::principal,
-  $realm              = $ipaclient::params::realm,
-  $server             = $ipaclient::params::server,
-  $ssh                = $ipaclient::params::ssh,
-  $sshd               = $ipaclient::params::sshd,
-  $sudo               = $ipaclient::params::sudo,
+  $automount                  = $ipaclient::params::automount,
+  $automount_location         = $ipaclient::params::automount_location,
+  $automount_server           = $ipaclient::params::automount_server,
+  $domain                     = $ipaclient::params::domain,
+  $fixed_primary              = $ipaclient::params::fixed_primary,
+  $force                      = $ipaclient::params::force,
+  $installer                  = $ipaclient::params::installer,
+  $mkhomedir                  = $ipaclient::params::mkhomedir,
+  $needs_sudo_config          = $ipaclient::params::needs_sudo_config,
+  $ntp                        = $ipaclient::params::ntp,
+  $options                    = $ipaclient::params::options,
+  $package                    = $ipaclient::params::package,
+  $password                   = $ipaclient::params::password,
+  $principal                  = $ipaclient::params::principal,
+  $realm                      = $ipaclient::params::realm,
+  $server                     = $ipaclient::params::server,
+  $ssh                        = $ipaclient::params::ssh,
+  $sshd                       = $ipaclient::params::sshd,
+  $sssd_sudo_cache_timeout    = $ipaclient::params::sssd_sudo_cache_timeout,
+  $sssd_sudo_full_refresh     = $ipaclient::params::sssd_sudo_full_refresh,
+  $sssd_sudo_smart_refresh    = $ipaclient::params::sssd_sudo_smart_refresh,
+  $sssd_default_domain_suffix = $ipaclient::params::sssd_default_domain_suffix,
+  $sudo                       = $ipaclient::params::sudo,
 ) inherits ipaclient::params {
 
   package { $package:
@@ -245,5 +260,13 @@ class ipaclient (
         require  => $installer_resource,
     }
   }
+
+  class { 'ipaclient::sssd':
+    sssd_sudo_cache_timeout    => $sssd_sudo_cache_timeout,
+    sssd_sudo_full_refresh     => $sssd_sudo_full_refresh,
+    sssd_sudo_smart_refresh    => $sssd_sudo_smart_refresh,
+    sssd_default_domain_suffix => $sssd_default_domain_suffix,
+  }
+
 }
 
