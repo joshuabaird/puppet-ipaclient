@@ -36,7 +36,7 @@ available.
 Discovery register (w/ sane defaults: sudo, mkhomedir, ssh, etc):
 
     class { 'ipaclient':
-      password => "rainbows"
+      password => "rainbows",
     }
 
 More complex:
@@ -44,13 +44,13 @@ More complex:
     class { 'ipaclient':
        principal       => "admin",
        password        => "unicorns",
-       server          => ["ipa01.pixiedust.com", "ipa02.pixiedust.com"]
+       server          => ["ipa01.pixiedust.com", "ipa02.pixiedust.com"],
        domain          => "pixiedust.com",
        realm           => "PIXEDUST.COM",
        mkhomedir       => false,
        automount       => true,
        ssh             => false,
-       fixed_primary   => true
+       fixed_primary   => true,
        automount_location => "home",
     }
 
