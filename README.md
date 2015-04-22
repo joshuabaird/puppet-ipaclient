@@ -50,7 +50,7 @@ More complex:
        mkhomedir       => false,
        automount       => true,
        ssh             => false,
-       fixed_primary   => true
+       fixed_primary   => true,
        automount_location => "home",
     }
 
