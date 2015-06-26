@@ -33,7 +33,7 @@ class ipaclient::params {
   # RHEL 7.0 requires manual confifuration
   # RHEL >=7.1 includes automatic sudo configuration
   case $::osfamily {
-    RedHat: {
+    'RedHat': {
       case $::operatingsystem {
         'Fedora': {
           if (versioncmp($::operatingsystemrelease, '21') >= 0) {
@@ -55,7 +55,7 @@ class ipaclient::params {
         }
       }
     }
-    Debian: {
+    'Debian': {
       case $::operatingsystem {
         'Ubuntu': {
           if (versioncmp($::operatingsystemrelease, '15.04') > 0) {
@@ -76,7 +76,7 @@ class ipaclient::params {
 
   # Name of IPA package to install
   case $::osfamily {
-    RedHat: {
+    'RedHat': {
       case $::operatingsystem {
         'fedora': {
           $package = 'freeipa-client'
@@ -86,7 +86,7 @@ class ipaclient::params {
         }
       }
     }
-    Debian: {
+    'Debian': {
         $package = 'freeipa-client'
     }
     default: {
