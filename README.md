@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/stbenjam/puppet-ipaclient.svg?branch=master)](https://travis-ci.org/stbenjam/puppet-ipaclient)
+[![Build Status](https://travis-ci.org/joshuabaird/puppet-ipaclient.svg?branch=master)](https://travis-ci.org/joshuabaird/puppet-ipaclient)
 
 IPAclient
 ========
