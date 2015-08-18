@@ -1,5 +1,5 @@
 {
-  "name": "joshuabaird-testmodule",
+  "name": "puppet-ipaclient",
   "version": "2.5.0",
   "author": "Josh Baird",
   "summary": "Manages IPA client registration",

@@ -3,7 +3,7 @@
 IPAclient
 ========
 
-This module configures clients to use FreeIPA with as little fuss as possible.
+This module configures clients to use FreeIPA with as little fuss as possible.  This module used to be known as stbenjam/puppet-ipaclient, but is now being maintained at joshuabaird/puppet-ipaclient.
 
 Thanks to all the [contributors](https://github.com/stbenjam/puppet-ipaclient/graphs/contributors)!
 
