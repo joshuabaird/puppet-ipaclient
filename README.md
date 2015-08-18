@@ -1,31 +1,30 @@
-[![Build Status](https://travis-ci.org/stbenjam/puppet-ipaclient.svg?branch=master)](https://travis-ci.org/stbenjam/puppet-ipaclient)
+[![Build Status](https://travis-ci.org/joshuabaird/puppet-ipaclient.svg?branch=master)](https://travis-ci.org/joshuabaird/puppet-ipaclient)
 
 IPAclient
 ========
 
-This module configures clients to use FreeIPA with as little fuss as possible.
+This module configures clients to use FreeIPA with as little fuss as possible.  This module used to be known as stbenjam/puppet-ipaclient, but is now being maintained at joshuabaird/puppet-ipaclient.
 
-Feedback and pull requests are very welcome.
+Thanks to all the [contributors](https://github.com/stbenjam/puppet-ipaclient/graphs/contributors)!
 
 What's New
 ----------
 
-(Experimental) Ubuntu support!
+  * FreeIPA 4 Support
 
-Refactored parameters to have better names, version
-2.0 isn't compatible with previous versions of the
-module.
+Contributing
+------------
+
+Feedback and pull requests are very welcome.  New functionality should have tests.
 
 Supported Platforms
 -------------------
 
-Tested on:
-  * RHEL and CentOS 6
-  * Fedora 20
-  * Ubuntu 14.04
+  * Enterprise Linux 6, 7 (RHEL, CentOS, etc)
+  * Fedora 20 or newer
+  * Ubuntu 14.04 or newer
 
-It should hopefully work on any recent Red Hat or Debian
-distro with IPA packages.  
+Basically, any Red Hat or Debian derivative with packages.
 
 Examples
 --------
@@ -36,7 +35,7 @@ available.
 Discovery register (w/ sane defaults: sudo, mkhomedir, ssh, etc):
 
     class { 'ipaclient':
-      password => "rainbows",
+      password => "rainbows"
     }
 
 More complex:
@@ -44,19 +43,21 @@ More complex:
     class { 'ipaclient':
        principal       => "admin",
        password        => "unicorns",
-       server          => ["ipa01.pixiedust.com", "ipa02.pixiedust.com"],
+       server          => ["ipa01.pixiedust.com", "ipa02.pixiedust.com"]
        domain          => "pixiedust.com",
        realm           => "PIXEDUST.COM",
        mkhomedir       => false,
        automount       => true,
        ssh             => false,
-       fixed_primary   => true,
+       fixed_primary   => true
        automount_location => "home",
     }
 
-Simple sudoers setup:
+Simple sudoers setup (only needed for older FreeIPA 3.x clients):
 
     class { 'ipaclient::sudoers': }
+
+Note that starting with RHEL 6.6 and RHEL 7.1, ```ipa-client-install``` automatically takes care of all sudo configuration.  If you are running these versions, this module will not attempt to perform any sudo configuration.
 
 Automounter only:
 
@@ -67,7 +68,7 @@ Automounter only:
 
 MIT License
 -----------
-Copyright (c) 2014 Stephen Benjamin
+Copyright (c) 2015 Stephen Benjamin & Josh Baird
 
 Permission is hereby granted, free of charge, to any person obtaining 
 a copy of this software and associated documentation files (the "Software"), 
