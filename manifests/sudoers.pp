@@ -78,12 +78,6 @@ class ipaclient::sudoers (
       ensure  => installed,
     }
 
-    service { 'sssd':
-      ensure  => running,
-      enable  => true,
-      require => Package[$libsss_sudo_package],
-    }
-
     augeas { 'nsswitch_sudoers':
       context => '/files/etc/nsswitch.conf',
       changes => [
