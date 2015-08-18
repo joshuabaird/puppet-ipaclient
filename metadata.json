@@ -1,22 +1,14 @@
 {
-  "name": "stbenjam-ipaclient",
+  "name": "joshuabaird-testmodule",
   "version": "2.5.0",
-  "author": "stbenjam",
-  "summary": "Manages server IPA Registration",
-  "license": "MIT",
-  "source": "http://www.github.com/stbenjam/puppet-ipaclient",
-  "project_page": "http://www.github.com/stbenjam/puppet-ipaclient",
-  "issues_url": "https://www.github.com/stbenjam/puppet-ipaclient/issues",
-  "description": "A Puppet module for managing FreeIPA Client Registration",
-  "operatingsystem_support": [
-    { "operatingsystem": "RedHat", "operatingsystemrelease": [ "6", "7" ] },
-    { "operatingsystem": "CentOS", "operatingsystemrelease": [ "6", "7" ] },
-    { "operatingsystem": "Scientific", "operatingsystemrelease": [ "6", "7" ] },
-    { "operatingsystem": "Fedora", "operatingsystemrelease": [ "19", "20", "21" ] },
-    { "operatingsystem": "Debian", "operatingsystemrelease": [ "6", "7" ] },
-    { "operatingsystem": "Ubuntu", "operatingsystemrelease": [ "12.04", "14.04" ] }
-  ],
+  "author": "Josh Baird",
+  "summary": "Manages IPA client registration",
+  "license": "Apache 2.0",
+  "source": "https://github.com/joshuabaird/puppet-ipaclient",
+  "project_page": "https://github.com/joshuabaird/puppet-ipaclient",
+  "issues_url": "https://github.com/joshuabaird/puppet-ipaclient/issues",
   "dependencies": [
-    {"name":"puppetlabs/stdlib","version_requirement":">= 3.0.0"}
+    {"name":"puppetlabs-stdlib","version_requirement":">= 1.0.0"}
   ]
 }
+
