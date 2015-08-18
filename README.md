@@ -10,7 +10,7 @@ Thanks to all the [contributors](https://github.com/stbenjam/puppet-ipaclient/gr
 What's New
 ----------
 
-FreeIPA 4 Support
+  * FreeIPA 4 Support
 
 Contributing
 ------------
@@ -57,6 +57,8 @@ Simple sudoers setup (only needed for older FreeIPA 3.x clients):
 
     class { 'ipaclient::sudoers': }
 
+Note that starting with RHEL 6.6 and RHEL 7.1, ```ipa-client-install``` automatically takes care of all sudo configuration.  If you are running these versions, this module will not attempt to perform any sudo configuration.
+
 Automounter only:
 
     class { 'ipaclient::automount':
@@ -66,7 +68,7 @@ Automounter only:
 
 MIT License
 -----------
-Copyright (c) 2014 Stephen Benjamin
+Copyright (c) 2015 Stephen Benjamin & Josh Baird
 
 Permission is hereby granted, free of charge, to any person obtaining 
 a copy of this software and associated documentation files (the "Software"), 
