@@ -9,7 +9,7 @@ rvm:
   - 2.0.0
 notifications:
   email:
-    - stephen@bitbin.de
+    - jbaird@follett.com
 env:
   - PUPPET_VERSION="~> 2.7.0"
   - PUPPET_VERSION="~> 3.2.0"
