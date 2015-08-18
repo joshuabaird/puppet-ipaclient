@@ -1,12 +1,12 @@
 {
-  "name": "stbenjam-ipaclient",
+  "name": "joshuabaird-ipaclient",
   "version": "2.5.0",
-  "author": "stbenjam",
+  "author": "joshuabaird",
   "summary": "Manages server IPA Registration",
   "license": "MIT",
-  "source": "http://www.github.com/stbenjam/puppet-ipaclient",
-  "project_page": "http://www.github.com/stbenjam/puppet-ipaclient",
-  "issues_url": "https://www.github.com/stbenjam/puppet-ipaclient/issues",
+  "source": "http://www.github.com/joshuabaird/puppet-ipaclient",
+  "project_page": "http://www.github.com/joshuabaird/puppet-ipaclient",
+  "issues_url": "https://www.github.com/joshuabaird/puppet-ipaclient/issues",
   "description": "A Puppet module for managing FreeIPA Client Registration",
   "operatingsystem_support": [
     { "operatingsystem": "RedHat", "operatingsystemrelease": [ "6", "7" ] },
