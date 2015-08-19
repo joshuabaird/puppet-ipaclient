@@ -11,5 +11,5 @@ notifications:
   email:
     - jbaird@follett.com
 env:
-  - PUPPET_VERSION=3.5
+  - PUPPET_VERSION=">= 3.3"
 bundler_args: --without development
