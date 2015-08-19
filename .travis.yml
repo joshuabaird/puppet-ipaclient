@@ -1,0 +1,15 @@
+---
+before_install:
+  - sudo apt-get install -qq augeas-tools augeas-lenses libaugeas-dev
+  - sudo wget -O /usr/share/augeas/lenses/sssd.aug https://raw.githubusercontent.com/hercules-team/augeas/master/lenses/sssd.aug
+language: ruby
+script: "rake spec"
+rvm:
+  - 1.9.3
+  - 2.0.0
+notifications:
+  email:
+    - jbaird@follett.com
+env:
+  - PUPPET_VERSION=3.5
+bundler_args: --without development
