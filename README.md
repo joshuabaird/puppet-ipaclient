@@ -1,3 +1,4 @@
+[![Puppet Forge](http://img.shields.io/puppetforge/v/joshuabaird/ipaclient.svg)](https://forge.puppetlabs.com/joshuabaird/ipaclient)
 [![Build Status](https://travis-ci.org/joshuabaird/puppet-ipaclient.svg?branch=master)](https://travis-ci.org/joshuabaird/puppet-ipaclient)
 
 IPAclient
