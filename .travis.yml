@@ -1,0 +1,33 @@
+---
+before_install:
+  - sudo apt-get install -qq augeas-tools augeas-lenses libaugeas-dev
+  - sudo wget -O /usr/share/augeas/lenses/sssd.aug https://raw.githubusercontent.com/hercules-team/augeas/master/lenses/sssd.aug
+language: ruby
+script: "fakeroot bundle exec rake spec"
+rvm:
+  - 1.9.3
+  - 2.0.0
+notifications:
+  email:
+    - jbaird@follett.com
+env:
+  matrix:
+    - PUPPET_GEM_VERSION="~> 3.1.0"
+    - PUPPET_GEM_VERSION="~> 3.2.0"
+    - PUPPET_GEM_VERSION="~> 3.3.0"
+    - PUPPET_GEM_VERSION="~> 3.4.0"
+    - PUPPET_GEM_VERSION="~> 3.5.0"
+    - PUPPET_GEM_VERSION="~> 3.6.0"
+    - PUPPET_GEM_VERSION="~> 3.7.0"
+    - PUPPET_GEM_VERSION="~> 3.8.0"
+    - PUPPET_GEM_VERSION="~> 3" PARSER="future"
+    - PUPPET_GEM_VERSION="~> 4"
+matrix:
+  exclude:
+    - rvm: 2.0.0
+      env: PUPPET_GEM_VERSION="~> 3.1.0"
+    - rvm: 1.9.3
+      env: PUPPET_GEM_VERSION="~> 4"
+    - rvm: 2.0.0
+      env: PUPPET_GEM_VERSION="~> 4"
+  
