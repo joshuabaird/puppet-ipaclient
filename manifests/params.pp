@@ -37,7 +37,7 @@ class ipaclient::params {
       case $::operatingsystem {
         'Fedora': {
           if (versioncmp($::operatingsystemrelease, '21') >= 0) {
-            $needs_sudo_config = false 
+            $needs_sudo_config = false
           } else {
             $needs_sudo_config = true
           }
