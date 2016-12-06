@@ -3,8 +3,9 @@ require 'spec_helper'
 describe 'ipaclient::automount' do
   context "Fedora" do
     let :facts do {
-      :osfamily        => 'RedHat',
-      :operatingsystem => 'Fedora'
+      :osfamily               => 'RedHat',
+      :operatingsystem        => 'Fedora',
+			:operatingsystemrelease => '21'
     } end
 
     describe "no options" do

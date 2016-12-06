@@ -26,14 +26,15 @@
 #
 class ipaclient::sudoers (
   $server = $::ipa_server,
-  $domain = $::ipa_domain
-) {
+  $domain = $::ipa_domain,
+  $automount = $ipaclient::params::automount,
+) inherits ipaclient::params {
 
   if !empty($server) and !empty($domain) {
     $realm = upcase($domain)
 
     case $::osfamily {
-      RedHat: {
+      'RedHat': {
 
         if ($::operatingsystem == 'Fedora' and
           versioncmp($::operatingsystemrelease, '20') >= 0) {
@@ -52,7 +53,7 @@ class ipaclient::sudoers (
                                 '/etc/sysconfig/network'),
         }
       }
-      Debian: {
+      'Debian': {
         $libsss_sudo_package = 'libsss-sudo'
         $safe_domain = shellquote($domain)
 
@@ -123,7 +124,7 @@ class ipaclient::sudoers (
       }
     }
 
-    if ($::ipaclient::automount) {
+    if ($automount) {
       $sssd_with_automount = $::sssd_services ? {
         /autofs/ => $::sssd_services,
         default  => "${::sssd_services}, autofs"
