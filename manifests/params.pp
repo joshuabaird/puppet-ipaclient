@@ -5,9 +5,10 @@
 class ipaclient::params {
 
   $server         = ''
-  $domain         = ''
-  $realm          = ''
-  $principal      = ''
+  $hostname       = undef
+  $domain         = undef
+  $realm          = undef
+  $principal      = undef
   $password       = ''
   $ntp_server     = ''
   $ssh            = true
@@ -37,7 +38,7 @@ class ipaclient::params {
       case $::operatingsystem {
         'Fedora': {
           if (versioncmp($::operatingsystemrelease, '21') >= 0) {
-            $needs_sudo_config = false 
+            $needs_sudo_config = false
           } else {
             $needs_sudo_config = true
           }
