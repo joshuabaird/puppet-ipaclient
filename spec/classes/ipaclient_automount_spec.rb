@@ -5,7 +5,7 @@ describe 'ipaclient::automount' do
     let :facts do {
       :osfamily               => 'RedHat',
       :operatingsystem        => 'Fedora',
-			:operatingsystemrelease => '21'
+      :operatingsystemrelease => '21'
     } end
 
     describe "no options" do

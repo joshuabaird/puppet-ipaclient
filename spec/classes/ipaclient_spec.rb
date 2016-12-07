@@ -5,8 +5,8 @@ describe 'ipaclient' do
     let :facts do {
       :osfamily               => 'RedHat',
       :operatingsystem        => 'Fedora',
-			:operatingsystemrelease => '21',
-			:ipa_enrolled           => false,
+      :operatingsystemrelease => '21',
+      :ipa_enrolled           => false,
     } end
 
     describe "without required options" do
@@ -23,9 +23,9 @@ describe 'ipaclient' do
       let(:params) do {
         :mkhomedir => true,
         :password  => "unicorns",
-				:realm     => false,
-				:principal => false,
-				:domain    => false,
+        :realm     => false,
+        :principal => false,
+        :domain    => false,
       } end
 
       it "should have the right package name"  do
@@ -43,9 +43,9 @@ describe 'ipaclient' do
       let :params do {
         :password  => "unicorns",
         :options   => "--permit",
-				:realm     => false,
-				:principal => false,
-				:domain    => false
+        :realm     => false,
+        :principal => false,
+        :domain    => false
       } end
 
       it "should generate the right command" do
@@ -59,9 +59,9 @@ describe 'ipaclient' do
         :mkhomedir => true,
         :server    => ["ipa01.example.com", "ipa02.example.com"],
         :password  => "unicorns",
-				:realm     => false,
-				:principal => false,
-				:domain    => false
+        :realm     => false,
+        :principal => false,
+        :domain    => false
       } end
 
       it "should generate the right command" do
@@ -75,9 +75,9 @@ describe 'ipaclient' do
         :mkhomedir => true,
         :server    => "ipa01.example.com",
         :password  => "unicorns",
-				:realm     => false,
-				:principal => false,
-				:domain    => false
+        :realm     => false,
+        :principal => false,
+        :domain    => false
       } end
 
       it "should generate the right command" do
@@ -91,9 +91,9 @@ describe 'ipaclient' do
     let :facts do {
       :osfamily               => 'RedHat',
       :operatingsystem        => 'RedHat',
-			:operatingsystemrelease => '7.2',
+      :operatingsystemrelease => '7.2',
       :sssd_services          => 'nss, pam, ssh',
-			:ipa_enrolled           => false
+      :ipa_enrolled           => false
     } end
 
     describe "full manual register" do
@@ -145,8 +145,8 @@ describe 'ipaclient' do
     let :facts do {
       :osfamily               => 'RedHat',
       :operatingsystem        => 'Whatever',
-			:operatingsystemrelease => 'Whatever',
-			:ipa_enrolled           => true
+      :operatingsystemrelease => 'Whatever',
+      :ipa_enrolled           => true
     } end
 
     let :params do {
