@@ -58,6 +58,8 @@
 #
 # $hostname::              Client FQDN
 #
+# $force_join::            Forces domain joining if host already joined once
+#
 # === Examples
 #
 # Discovery register example:
@@ -108,6 +110,7 @@ class ipaclient (
   $sshd               = $ipaclient::params::sshd,
   $sudo               = $ipaclient::params::sudo,
   $hostname           = $ipaclient::params::hostname,
+  $force_join         = $ipaclient::params::force_join
 ) inherits ipaclient::params {
 
   package { $package:
@@ -196,12 +199,18 @@ class ipaclient (
       } else {
         $opt_sudo = ''
       }
+      
+      if str2bool($force_join) {
+        $opt_force_join = '--force-join'
+      } else {
+        $opt_force_join = ''
+      }
 
       # Flatten the arrays, delete empty options, and shellquote everything
       $command = shellquote(delete(flatten([$installer,$opt_realm,$opt_password,
                             $opt_principal,$opt_mkhomedir,$opt_domain,$opt_hostname,
                             $opt_server,$opt_fixed_primary,$opt_ssh,$opt_sshd,$opt_ntp,$opt_sudo,
-                            $opt_force,$options,'--unattended']), ''))
+                            $opt_force,$opt_force_join,$options,'--unattended']), ''))
 
       exec { 'ipa_installer':
         command => $command,
