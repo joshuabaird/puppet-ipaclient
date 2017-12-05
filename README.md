@@ -2,7 +2,7 @@
 [![Build Status](https://travis-ci.org/joshuabaird/puppet-ipaclient.svg?branch=master)](https://travis-ci.org/joshuabaird/puppet-ipaclient)
 
 IPAclient
-========
+=========
 
 This module configures clients to use FreeIPA with as little fuss as possible.  This module used to be known as stbenjam/puppet-ipaclient, but is now being maintained at joshuabaird/puppet-ipaclient.
 
@@ -36,22 +36,22 @@ available.
 Discovery register (w/ sane defaults: sudo, mkhomedir, ssh, etc):
 
     class { 'ipaclient':
-      password => "rainbows"
+      password => 'rainbows',
     }
 
 More complex:
 
     class { 'ipaclient':
-       principal       => "admin",
-       password        => "unicorns",
-       server          => ["ipa01.pixiedust.com", "ipa02.pixiedust.com"]
-       domain          => "pixiedust.com",
-       realm           => "PIXEDUST.COM",
-       mkhomedir       => false,
-       automount       => true,
-       ssh             => false,
-       fixed_primary   => true
-       automount_location => "home",
+       principal          => 'admin',
+       password           => 'unicorns',
+       server             => ["ipa01.${::domain}", "ipa02.${::domain}"],
+       domain             => $::domain,
+       realm              => upper($::domain),
+       mkhomedir          => false,
+       automount          => true,
+       ssh                => false,
+       fixed_primary      => true,
+       automount_location => 'home',
     }
 
 Simple sudoers setup (only needed for older FreeIPA 3.x clients):
@@ -63,8 +63,8 @@ Note that starting with RHEL 6.6 and RHEL 7.1, ```ipa-client-install``` automati
 Automounter only:
 
     class { 'ipaclient::automount':
-        location    => 'home',
-        server      => 'ipa01.pixiedust.com',
+        location => 'home',
+        server   => "ipa01.${::domain}",
     }
 
 MIT License
@@ -88,4 +88,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN 
 THE SOFTWARE.
-
