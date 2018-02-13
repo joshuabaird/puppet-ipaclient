@@ -32,6 +32,15 @@ if File.exist?('/etc/sssd/sssd.conf') && sssd = File.readlines('/etc/sssd/sssd.c
   end
 end
 
+# If sssd isn't installed, ipa isn't enrolled
+if not File.exist?('/etc/sssd/sssd.conf')
+  Facter.add("ipa_enrolled") do
+    setcode do
+      false
+    end
+  end
+end
+
 # In the event we can't find the records from SSSD, we'll use DNS
 if Facter.value(:ipa_server).nil? || Facter.value(:ipa_domain).nil?
   begin
