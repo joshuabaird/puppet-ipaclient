@@ -9,16 +9,6 @@ describe 'ipaclient' do
       :ipa_enrolled           => false,
     } end
 
-    describe "without required options" do
-      let(:params) do {
-        :mkhomedir => 'true'
-      } end
-
-      it "should fail without required options" do
-        expect { should compile }.to raise_error(/Require at least a join password/)
-      end
-    end
-
     describe "discovery register" do
       let(:params) do {
         :mkhomedir => true,
@@ -34,7 +24,7 @@ describe 'ipaclient' do
 
       it "should generate the right command" do
         should contain_exec('ipa_installer').
-          with_command("/usr/sbin/ipa-client-install --password unicorns --mkhomedir --unattended")
+          with_command("/usr/sbin/ipa-client-install --mkhomedir --password Sensitive [value redacted] --unattended")
       end
 
     end
@@ -50,7 +40,7 @@ describe 'ipaclient' do
 
       it "should generate the right command" do
         should contain_exec('ipa_installer').
-          with_command("/usr/sbin/ipa-client-install --password unicorns --mkhomedir --permit --unattended")
+          with_command("/usr/sbin/ipa-client-install --mkhomedir --permit --password Sensitive [value redacted] --unattended")
       end
     end
 
@@ -66,7 +56,7 @@ describe 'ipaclient' do
 
       it "should generate the right command" do
         should contain_exec('ipa_installer').
-          with_command('/usr/sbin/ipa-client-install --password unicorns --mkhomedir --server ipa01.example.com --server ipa02.example.com --unattended')
+          with_command("/usr/sbin/ipa-client-install --mkhomedir --server ipa01.example.com --server ipa02.example.com --password Sensitive [value redacted] --unattended")
       end
     end
 
@@ -82,7 +72,7 @@ describe 'ipaclient' do
 
       it "should generate the right command" do
         should contain_exec('ipa_installer').
-          with_command("/usr/sbin/ipa-client-install --password unicorns --mkhomedir --server ipa01.example.com --unattended")
+          with_command("/usr/sbin/ipa-client-install --mkhomedir --server ipa01.example.com --password Sensitive [value redacted] --unattended")
       end
     end
   end
@@ -117,7 +107,7 @@ describe 'ipaclient' do
       end
 
       it "should generate the correct command" do
-        should contain_exec('ipa_installer').with_command("/usr/sbin/ipa-client-install --realm PIXIEDUST.COM --password unicorns --principal rainbows@PIXIEDUST.COM --domain pixiedust.com --hostname client.pixiedust.com --server ipa01.pixiedust.com --no-sudo --unattended")
+        should contain_exec('ipa_installer').with_command("/usr/sbin/ipa-client-install --realm PIXIEDUST.COM --principal rainbows@PIXIEDUST.COM --domain pixiedust.com --hostname client.pixiedust.com --server ipa01.pixiedust.com --no-sudo --password Sensitive [value redacted] --unattended")
       end
 
       it "should not configure sudoers" do
