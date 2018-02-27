@@ -9,7 +9,6 @@ class ipaclient::params {
   $domain         = undef
   $realm          = undef
   $principal      = undef
-  $password       = ''
   $ntp_server     = ''
   $ssh            = true
   $sshd           = true

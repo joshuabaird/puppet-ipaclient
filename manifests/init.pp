@@ -90,6 +90,7 @@
 # Released under the MIT License. See LICENSE for more information
 #
 class ipaclient (
+  $password,
   $automount          = $ipaclient::params::automount,
   $automount_location = $ipaclient::params::automount_location,
   $automount_server   = $ipaclient::params::automount_server,
@@ -102,7 +103,6 @@ class ipaclient (
   $ntp                = $ipaclient::params::ntp,
   $options            = $ipaclient::params::options,
   $package            = $ipaclient::params::package,
-  $password           = $ipaclient::params::password,
   $principal          = $ipaclient::params::principal,
   $realm              = $ipaclient::params::realm,
   $server             = $ipaclient::params::server,
@@ -118,115 +118,110 @@ class ipaclient (
   }
 
   if !str2bool($::ipa_enrolled) {
-    if empty($password) {
-      fail('Require at least a join password')
+    # Build the installer command:
+    $safe_password = Sensitive(shellquote($password))
+
+    if is_array($server) {
+      # Transform ['a','b'] -> ['--server','a','--server','b']
+      $opt_server = split(join(prefix($server, '--server|'), '|'), '\|')
+    } elsif !empty($server) {
+      $opt_server = ['--server' ,$server]
     } else {
-      # Build the installer command:
+      $opt_server = ''
+    }
 
-      $opt_password = ['--password', $password]
+    if $domain {
+      $opt_domain = ['--domain', $domain]
+    } else {
+      $opt_domain = ''
+    }
 
-      if is_array($server) {
-        # Transform ['a','b'] -> ['--server','a','--server','b']
-        $opt_server = split(join(prefix($server, '--server|'), '|'), '\|')
-      } elsif !empty($server) {
-        $opt_server = ['--server' ,$server]
-      } else {
-        $opt_server = ''
-      }
+    if $hostname {
+      $opt_hostname = ['--hostname', $hostname]
+    } else {
+      $opt_hostname = ''
+    }
 
-      if $domain {
-        $opt_domain = ['--domain', $domain]
-      } else {
-        $opt_domain = ''
-      }
+    if $realm {
+      $opt_realm = ['--realm', $realm]
+    } else {
+      $opt_realm = ''
+    }
 
-      if $hostname {
-        $opt_hostname = ['--hostname', $hostname]
-      } else {
-        $opt_hostname = ''
-      }
+    if $principal {
+      $opt_principal = ['--principal', "${principal}@${realm}"]
+    } else {
+      $opt_principal = ''
+    }
 
-      if $realm {
-        $opt_realm = ['--realm', $realm]
-      } else {
-        $opt_realm = ''
-      }
+    if !str2bool($ssh) {
+      $opt_ssh = '--no-ssh'
+    } else {
+      $opt_ssh = ''
+    }
 
-      if $principal {
-        $opt_principal = ['--principal', "${principal}@${realm}"]
-      } else {
-        $opt_principal = ''
-      }
+    if !str2bool($sshd) {
+      $opt_sshd = '--no-sshd'
+    } else {
+      $opt_sshd = ''
+    }
 
-      if !str2bool($ssh) {
-        $opt_ssh = '--no-ssh'
-      } else {
-        $opt_ssh = ''
-      }
+    if str2bool($fixed_primary) {
+      $opt_fixed_primary = '--fixed-primary'
+    } else {
+      $opt_fixed_primary = ''
+    }
 
-      if !str2bool($sshd) {
-        $opt_sshd = '--no-sshd'
-      } else {
-        $opt_sshd = ''
-      }
+    if str2bool($mkhomedir) {
+      $opt_mkhomedir = '--mkhomedir'
+    } else {
+      $opt_mkhomedir = ''
+    }
 
-      if str2bool($fixed_primary) {
-        $opt_fixed_primary = '--fixed-primary'
-      } else {
-        $opt_fixed_primary = ''
-      }
+    if !str2bool($ntp) {
+      $opt_ntp = '--no-ntp'
+    } else {
+      $opt_ntp = ''
+    }
 
-      if str2bool($mkhomedir) {
-        $opt_mkhomedir = '--mkhomedir'
-      } else {
-        $opt_mkhomedir = ''
-      }
+    if str2bool($force) {
+      $opt_force = '--force'
+    } else {
+      $opt_force = ''
+    }
 
-      if !str2bool($ntp) {
-        $opt_ntp = '--no-ntp'
-      } else {
-        $opt_ntp = ''
-      }
+    if !str2bool($sudo) {
+      $opt_sudo = '--no-sudo'
+    } else {
+      $opt_sudo = ''
+    }
 
-      if str2bool($force) {
-        $opt_force = '--force'
-      } else {
-        $opt_force = ''
-      }
+    if str2bool($force_join) {
+      $opt_force_join = '--force-join'
+    } else {
+      $opt_force_join = ''
+    }
 
-      if !str2bool($sudo) {
-        $opt_sudo = '--no-sudo'
-      } else {
-        $opt_sudo = ''
-      }
-      
-      if str2bool($force_join) {
-        $opt_force_join = '--force-join'
-      } else {
-        $opt_force_join = ''
-      }
+    # Flatten the arrays, delete empty options, and shellquote everything
+    $command = shellquote(delete(flatten([$installer,$opt_realm,
+                          $opt_principal,$opt_mkhomedir,$opt_domain,$opt_hostname,
+                          $opt_server,$opt_fixed_primary,$opt_ssh,$opt_sshd,$opt_ntp,$opt_sudo,
+                          $opt_force,$opt_force_join,$options]), ''))
 
-      # Flatten the arrays, delete empty options, and shellquote everything
-      $command = shellquote(delete(flatten([$installer,$opt_realm,$opt_password,
-                            $opt_principal,$opt_mkhomedir,$opt_domain,$opt_hostname,
-                            $opt_server,$opt_fixed_primary,$opt_ssh,$opt_sshd,$opt_ntp,$opt_sudo,
-                            $opt_force,$opt_force_join,$options,'--unattended']), ''))
+    exec { 'ipa_installer':
+      command => "${command} --password ${safe_password} --unattended",
+      unless  => "/usr/sbin/ipa-client-install -U 2>&1 \
+        | /bin/grep -q 'already configured'",
+      require => Package[$package],
+    }
 
-      exec { 'ipa_installer':
-        command => $command,
-        unless  => "/usr/sbin/ipa-client-install -U 2>&1 \
-          | /bin/grep -q 'already configured'",
-        require => Package[$package],
-      }
+    $installer_resource = Exec['ipa_installer']
 
-      $installer_resource = Exec['ipa_installer']
-
-      # Include debian fixes since the installer doesn't properly
-      # configure ssh and mkhomedir
-      if ($::osfamily == 'Debian') {
-        class { 'ipaclient::debian_fixes':
-          require => $installer_resource,
-        }
+    # Include debian fixes since the installer doesn't properly
+    # configure ssh and mkhomedir
+    if ($::osfamily == 'Debian') {
+      class { 'ipaclient::debian_fixes':
+        require => $installer_resource,
       }
     }
   }
