@@ -97,16 +97,19 @@ class ipaclient::sudoers (
     # Selecting the right provider is a PITA
     if empty($::sssd_version) {
       case $::osfamily {
-        RedHat: {
+        'RedHat': {
           if (versioncmp($::operatingsystemrelease, '6.6') >= 0) {
             $ipa_provider = 'ipa'
           } else {
             $ipa_provider = 'ldap'
           }
         }
-        Debian: {
+        'Debian': {
           if (versioncmp($::operatingsystemrelease, '14.04') >= 0 and
             $::operatingsystem == 'Ubuntu') {
+            $ipa_provider = 'ipa'
+          } elsif (versioncmp($::operatingsystemrelease, '7.0') >= 0 and
+            $::operatingsystem == 'Debian') {
             $ipa_provider = 'ipa'
           } else {
             $ipa_provider = 'ldap'
