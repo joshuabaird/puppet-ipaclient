@@ -15,7 +15,6 @@ class ipaclient::params {
   $automount      = false
   $mkhomedir      = true
   $sudo           = true
-  $hostname       = $::fqdn
   $fixed_primary  = false
   $options        = ''
   $installer      = '/usr/sbin/ipa-client-install'
