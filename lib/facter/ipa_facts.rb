@@ -1,7 +1,7 @@
 require 'facter'
 require 'resolv'
 
-if File.exist?('/etc/sssd/sssd.conf') && sssd = File.readlines('/etc/sssd/sssd.conf')
+if File.exist?('/etc/krb5.keytab') && File.exist?('/etc/sssd/sssd.conf') && sssd = File.readlines('/etc/sssd/sssd.conf')
   sssd.each do |line|
     case line
       when /^ipa_domain/
@@ -53,5 +53,5 @@ if Facter.value(:ipa_server).nil? || Facter.value(:ipa_domain).nil?
 
   rescue => e
     # do nothing
-  end 
+  end
 end
