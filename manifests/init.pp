@@ -56,6 +56,10 @@
 # $sudo::                  Enable sudoers management
 #                          Default: true
 #
+# $hostname::              Client FQDN
+#
+# $force_join::            Forces domain joining if host already joined once
+#
 # === Examples
 #
 # Discovery register example:
@@ -105,6 +109,8 @@ class ipaclient (
   $ssh                = $ipaclient::params::ssh,
   $sshd               = $ipaclient::params::sshd,
   $sudo               = $ipaclient::params::sudo,
+  $hostname           = $ipaclient::params::hostname,
+  $force_join         = $ipaclient::params::force_join
 ) inherits ipaclient::params {
 
   package { $package:
@@ -132,6 +138,12 @@ class ipaclient (
         $opt_domain = ['--domain', $domain]
       } else {
         $opt_domain = ''
+      }
+
+      if $hostname {
+        $opt_hostname = ['--hostname', $hostname]
+      } else {
+        $opt_hostname = ''
       }
 
       if $realm {
@@ -187,12 +199,18 @@ class ipaclient (
       } else {
         $opt_sudo = ''
       }
+      
+      if str2bool($force_join) {
+        $opt_force_join = '--force-join'
+      } else {
+        $opt_force_join = ''
+      }
 
       # Flatten the arrays, delete empty options, and shellquote everything
       $command = shellquote(delete(flatten([$installer,$opt_realm,$opt_password,
-                            $opt_principal,$opt_mkhomedir,$opt_domain,
+                            $opt_principal,$opt_mkhomedir,$opt_domain,$opt_hostname,
                             $opt_server,$opt_fixed_primary,$opt_ssh,$opt_sshd,$opt_ntp,$opt_sudo,
-                            $opt_force,$options,'--unattended']), ''))
+                            $opt_force,$opt_force_join,$options,'--unattended']), ''))
 
       exec { 'ipa_installer':
         command => $command,

@@ -3,8 +3,10 @@ require 'spec_helper'
 describe 'ipaclient' do
   context "Fedora" do
     let :facts do {
-      :osfamily        => 'RedHat',
-      :operatingsystem => 'Fedora'
+      :osfamily               => 'RedHat',
+      :operatingsystem        => 'Fedora',
+      :operatingsystemrelease => '21',
+      :ipa_enrolled           => false,
     } end
 
     describe "without required options" do
@@ -20,7 +22,10 @@ describe 'ipaclient' do
     describe "discovery register" do
       let(:params) do {
         :mkhomedir => true,
-        :password  => "unicorns"
+        :password  => "unicorns",
+        :realm     => false,
+        :principal => false,
+        :domain    => false,
       } end
 
       it "should have the right package name"  do
@@ -32,15 +37,15 @@ describe 'ipaclient' do
           with_command("/usr/sbin/ipa-client-install --password unicorns --mkhomedir --unattended")
       end
 
-      it "should configure sudo" do
-        should contain_class('ipaclient::sudoers')
-      end
     end
 
     describe "arbitrary options" do
       let :params do {
-        :password => "unicorns",
-        :options  => "--permit"
+        :password  => "unicorns",
+        :options   => "--permit",
+        :realm     => false,
+        :principal => false,
+        :domain    => false
       } end
 
       it "should generate the right command" do
@@ -53,7 +58,10 @@ describe 'ipaclient' do
       let :params do {
         :mkhomedir => true,
         :server    => ["ipa01.example.com", "ipa02.example.com"],
-        :password  => "unicorns"
+        :password  => "unicorns",
+        :realm     => false,
+        :principal => false,
+        :domain    => false
       } end
 
       it "should generate the right command" do
@@ -66,7 +74,10 @@ describe 'ipaclient' do
       let :params do {
         :mkhomedir => true,
         :server    => "ipa01.example.com",
-        :password  => "unicorns"
+        :password  => "unicorns",
+        :realm     => false,
+        :principal => false,
+        :domain    => false
       } end
 
       it "should generate the right command" do
@@ -78,9 +89,11 @@ describe 'ipaclient' do
 
   context 'RedHat' do
     let :facts do {
-      :osfamily        => 'RedHat',
-      :operatingsystem => 'RedHat',
-      :sssd_services   => 'nss, pam, ssh'
+      :osfamily               => 'RedHat',
+      :operatingsystem        => 'RedHat',
+      :operatingsystemrelease => '7.2',
+      :sssd_services          => 'nss, pam, ssh',
+      :ipa_enrolled           => false
     } end
 
     describe "full manual register" do
@@ -90,6 +103,7 @@ describe 'ipaclient' do
         :principal => "rainbows",
         :server    => "ipa01.pixiedust.com",
         :domain    => "pixiedust.com",
+        :hostname  => "client.pixiedust.com",
         :realm     => "PIXIEDUST.COM",
         :sudo      => false,
         :automount => true,
@@ -103,7 +117,7 @@ describe 'ipaclient' do
       end
 
       it "should generate the correct command" do
-        should contain_exec('ipa_installer').with_command("/usr/sbin/ipa-client-install --realm PIXIEDUST.COM --password unicorns --principal rainbows@PIXIEDUST.COM --domain pixiedust.com --server ipa01.pixiedust.com --no-sudo --unattended")
+        should contain_exec('ipa_installer').with_command("/usr/sbin/ipa-client-install --realm PIXIEDUST.COM --password unicorns --principal rainbows@PIXIEDUST.COM --domain pixiedust.com --hostname client.pixiedust.com --server ipa01.pixiedust.com --no-sudo --unattended")
       end
 
       it "should not configure sudoers" do
@@ -124,16 +138,15 @@ describe 'ipaclient' do
           :automount_location => 'home'
       } end
 
-      it "should configure sssd" do
-        should contain_augeas('sssd')
-      end
     end
   end
 
   context 'Non-Fedora RedHat OS' do
     let :facts do {
-      :osfamily        => 'RedHat',
-      :operatingsystem => 'Whatever'
+      :osfamily               => 'RedHat',
+      :operatingsystem        => 'Whatever',
+      :operatingsystemrelease => 'Whatever',
+      :ipa_enrolled           => true
     } end
 
     let :params do {
@@ -154,21 +167,6 @@ describe 'ipaclient' do
 
     it 'should fail' do
       expect { should compile }.to raise_error(/does not support/)
-    end
-  end
-
-  context 'Debian' do
-    let :facts do {
-      :osfamily  => 'Debian',
-    } end
-
-    let :params do {
-      :mkhomedir => 'true',
-      :password  => "unicorns",
-    } end
-
-    it 'should include debian_fixes' do
-      should contain_class('ipaclient::debian_fixes')
     end
   end
 end

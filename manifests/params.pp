@@ -5,9 +5,10 @@
 class ipaclient::params {
 
   $server         = ''
-  $domain         = ''
-  $realm          = ''
-  $principal      = ''
+  $hostname       = undef
+  $domain         = undef
+  $realm          = undef
+  $principal      = undef
   $password       = ''
   $ntp_server     = ''
   $ssh            = true
@@ -26,6 +27,7 @@ class ipaclient::params {
   $sssd_sudo_full_refresh      = ''
   $sssd_sudo_smart_refresh     = ''
   $sssd_default_domain_suffix  = ''
+  $force_join     = false
 
   # Determine if client needs manual sudo configuration or not
   # RHEL <=6.5 requires manual configuration
@@ -37,7 +39,7 @@ class ipaclient::params {
       case $::operatingsystem {
         'Fedora': {
           if (versioncmp($::operatingsystemrelease, '21') >= 0) {
-            $needs_sudo_config = false 
+            $needs_sudo_config = false
           } else {
             $needs_sudo_config = true
           }
