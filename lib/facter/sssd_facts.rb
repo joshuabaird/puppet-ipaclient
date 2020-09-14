@@ -1,5 +1,11 @@
 require 'facter'
-require 'augeas'
+
+begin
+  require 'augeas'
+  has_augeas = true
+rescue
+  has_augeas = false
+end
 
 Facter.add('sssd_version') do
   setcode do
@@ -9,7 +15,7 @@ end
 
 Facter.add(:sssd_services) do
   setcode do
-    if File.exist? '/etc/sssd/sssd.conf'
+    if has_augeas and File.exist? '/etc/sssd/sssd.conf'
       Augeas::open do |aug|
         aug.load
         aug.get("/files/etc/sssd/sssd.conf/target[.='sssd']/services")
