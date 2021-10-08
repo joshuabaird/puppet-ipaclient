@@ -109,7 +109,7 @@ class ipaclient::sudoers (
             $::operatingsystem == 'Ubuntu') {
             $ipa_provider = 'ipa'
           } elsif (versioncmp($::operatingsystemrelease, '7.0') >= 0 and
-            $::operatingsystem == 'Debian') {
+            ($::operatingsystem == 'Debian' or $::operatingsystem == 'Raspbian')) {
             $ipa_provider = 'ipa'
           } else {
             $ipa_provider = 'ldap'
