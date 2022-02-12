@@ -28,6 +28,7 @@ class ipaclient::params {
   $sssd_sudo_smart_refresh     = ''
   $sssd_default_domain_suffix  = ''
   $force_join     = false
+  $package_options = []
 
   # Determine if client needs manual sudo configuration or not
   # RHEL <=6.5 requires manual configuration
