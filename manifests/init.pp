@@ -102,6 +102,7 @@ class ipaclient (
   $ntp                = $ipaclient::params::ntp,
   $options            = $ipaclient::params::options,
   $package            = $ipaclient::params::package,
+  $package_options    = $ipaclient::params::package_options,
   $password           = $ipaclient::params::password,
   $principal          = $ipaclient::params::principal,
   $realm              = $ipaclient::params::realm,
@@ -115,6 +116,7 @@ class ipaclient (
 
   package { $package:
     ensure => installed,
+    install_options => $package_options,
   }
 
   if !str2bool($::ipa_enrolled) {
