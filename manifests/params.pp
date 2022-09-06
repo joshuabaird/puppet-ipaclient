@@ -15,6 +15,7 @@ class ipaclient::params {
   $sshd           = true
   $automount      = false
   $mkhomedir      = true
+  $subid          = false
   $sudo           = true
   $fixed_primary  = false
   $options        = ''
