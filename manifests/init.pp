@@ -200,7 +200,9 @@ class ipaclient (
         $opt_force = ''
       }
 
-      if versioncmp($::ipa_client_version, "4.9.10") >= 0 and str2bool($subid) {
+      if !empty($::ipa_client_version) and
+         versioncmp($::ipa_client_version, "4.9.10") >= 0 and
+         str2bool($subid) {
         $opt_subid = '--subid'
       } else {
         $opt_subid = ''
