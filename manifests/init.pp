@@ -53,6 +53,9 @@
 # $sshd::                  Enable SSHD Integration
 #                          Default: true
 #
+# $subid::                 Use SSSD as subid provider
+#                          Default: false
+#
 # $sudo::                  Enable sudoers management
 #                          Default: true
 #
@@ -102,12 +105,14 @@ class ipaclient (
   $ntp                = $ipaclient::params::ntp,
   $options            = $ipaclient::params::options,
   $package            = $ipaclient::params::package,
+  $package_options    = $ipaclient::params::package_options,
   $password           = $ipaclient::params::password,
   $principal          = $ipaclient::params::principal,
   $realm              = $ipaclient::params::realm,
   $server             = $ipaclient::params::server,
   $ssh                = $ipaclient::params::ssh,
   $sshd               = $ipaclient::params::sshd,
+  $subid              = $ipaclient::params::subid,
   $sudo               = $ipaclient::params::sudo,
   $hostname           = $ipaclient::params::hostname,
   $force_join         = $ipaclient::params::force_join
@@ -115,6 +120,7 @@ class ipaclient (
 
   package { $package:
     ensure => installed,
+    install_options => $package_options,
   }
 
   if !str2bool($::ipa_enrolled) {
@@ -194,6 +200,14 @@ class ipaclient (
         $opt_force = ''
       }
 
+      if !empty($::ipa_client_version) and
+         versioncmp($::ipa_client_version, "4.9.10") >= 0 and
+         str2bool($subid) {
+        $opt_subid = '--subid'
+      } else {
+        $opt_subid = ''
+      }
+
       if !str2bool($sudo) {
         $opt_sudo = '--no-sudo'
       } else {
@@ -209,14 +223,19 @@ class ipaclient (
       # Flatten the arrays, delete empty options, and shellquote everything
       $command = shellquote(delete(flatten([$installer,$opt_realm,$opt_password,
                             $opt_principal,$opt_mkhomedir,$opt_domain,$opt_hostname,
-                            $opt_server,$opt_fixed_primary,$opt_ssh,$opt_sshd,$opt_ntp,$opt_sudo,
-                            $opt_force,$opt_force_join,$options,'--unattended']), ''))
+                            $opt_server,$opt_fixed_primary,$opt_ssh,$opt_sshd,$opt_ntp,
+                            $opt_sudo,$opt_subid,$opt_force,$opt_force_join,$options,
+                            '--unattended']), ''))
 
-      exec { 'ipa_installer':
-        command => $command,
-        unless  => "/usr/sbin/ipa-client-install -U 2>&1 \
-          | /bin/grep -q 'already configured'",
-        require => Package[$package],
+      # Make sure we can collect the `ipa_client_version` fact first
+      # Makes us run twice, though :(
+      if !empty($::ipa_client_version) {
+        exec { 'ipa_installer':
+          command => $command,
+          unless  => "/usr/sbin/ipa-client-install -U 2>&1 \
+            | /bin/grep -q 'already configured'",
+          require => Package[$package],
+        }
       }
 
       $installer_resource = Exec['ipa_installer']
