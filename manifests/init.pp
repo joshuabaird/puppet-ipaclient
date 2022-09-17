@@ -227,11 +227,15 @@ class ipaclient (
                             $opt_sudo,$opt_subid,$opt_force,$opt_force_join,$options,
                             '--unattended']), ''))
 
-      exec { 'ipa_installer':
-        command => $command,
-        unless  => "/usr/sbin/ipa-client-install -U 2>&1 \
-          | /bin/grep -q 'already configured'",
-        require => Package[$package],
+      # Make sure we can collect the `ipa_client_version` fact first
+      # Makes us run twice, though :(
+      if !empty($::ipa_client_version) {
+        exec { 'ipa_installer':
+          command => $command,
+          unless  => "/usr/sbin/ipa-client-install -U 2>&1 \
+            | /bin/grep -q 'already configured'",
+          require => Package[$package],
+        }
       }
 
       $installer_resource = Exec['ipa_installer']
