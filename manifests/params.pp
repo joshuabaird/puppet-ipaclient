@@ -15,6 +15,7 @@ class ipaclient::params {
   $sshd           = true
   $automount      = false
   $mkhomedir      = true
+  $subid          = false
   $sudo           = true
   $fixed_primary  = false
   $options        = ''
@@ -28,13 +29,14 @@ class ipaclient::params {
   $sssd_sudo_smart_refresh     = ''
   $sssd_default_domain_suffix  = ''
   $force_join     = false
+  $package_options = []
 
   # Determine if client needs manual sudo configuration or not
   # RHEL <=6.5 requires manual configuration
   # RHEL 6.6 includes automatic sudo configuration
   # RHEL 7.0 requires manual confifuration
   # RHEL >=7.1 includes automatic sudo configuration
-  case $::osfamily {
+  case $facts['os']['family'] {
     'RedHat': {
       case $::operatingsystem {
         'Fedora': {
@@ -72,12 +74,12 @@ class ipaclient::params {
       }
     }
     default: {
-      fail("This module does not support operatingsystem ${::operatingsystem}")
+      fail("This module does not support os family " + facts['os']['family'])
     }
   }
 
   # Name of IPA package to install
-  case $::osfamily {
+  case $facts['os']['family'] {
     'RedHat': {
       case $::operatingsystem {
         'fedora': {
@@ -92,7 +94,7 @@ class ipaclient::params {
         $package = 'freeipa-client'
     }
     default: {
-      fail("This module does not support operatingsystem ${::operatingsystem}")
+      fail("This module does not support os family " + $facts['os']['family'])
     }
   }
 }

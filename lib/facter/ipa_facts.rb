@@ -1,6 +1,14 @@
 require 'facter'
 require 'resolv'
 
+Facter.add('ipa_client_version') do
+  setcode do
+    if Facter::Util::Resolution.which('ipa-client-install')
+      Facter::Util::Resolution.exec('ipa-client-install --version')
+    end
+  end
+end
+
 if File.exist?('/etc/sssd/sssd.conf') && sssd = File.readlines('/etc/sssd/sssd.conf')
   sssd.each do |line|
     case line
